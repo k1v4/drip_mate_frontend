@@ -1,0 +1,208 @@
+html, body {
+    margin: 0;
+}
+
+.homeRoot{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column; /* Располагаем элементы вертикально */
+    min-height: 100vh;
+
+    background-color: #0E0F15;
+
+    .mainImg{
+        aspect-ratio: 1 / 1; 
+    }
+
+    header{
+        color: white;   
+        padding: 2%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2vw;
+    }
+
+    .main {
+        flex: 1;
+        padding: 1% 2% 1% 2%;
+    }
+
+    h1{
+        margin: 0;
+        margin-block-start: 0;
+        margin-block-end: 0;
+    }
+
+    .slogan{
+        height: 3%;
+        display: flex;
+        justify-content: center; /* Горизонтальное выравнивание */
+        align-items: center;
+        font-family: Oswald;
+        color: #F9F8F3;
+        margin-bottom: 2%;
+    }
+
+    footer{
+        background-color: #17181F;
+        height: 12vh;
+        display: flex;
+        justify-content: center; /* Горизонтальное выравнивание */
+        align-items: center;
+        font-family: Oswald;
+        color: #F9F8F3;
+    }
+
+    .items-container {
+        width: 90%;
+    }
+      
+    .item {
+        cursor: pointer;
+        margin-bottom: 2%;
+    }
+      
+    .article-content {
+        display: flex; // Используем flexbox для размещения картинки и текста
+        align-items: flex-start; // Выравниваем элементы по верхнему краю
+    }
+      
+    .article-image {
+        width: 200px; // Фиксированная ширина картинки
+        height: 150px; // Фиксированная высота картинки
+        object-fit: cover; // Обрезаем изображение, если оно не помещается
+        border-radius: 8px; // Скругляем углы
+        margin-right: 2vw; // Отступ между картинкой и текстом
+    }
+      
+    .article-text {
+        color: #F9F8F3;
+        font-family: Inter;
+    }
+      
+    .article-text h2 {
+        font-size: 24px; // Размер заголовка
+        color: #F9F8F3; // Цвет заголовка
+    }
+      
+    .article-meta {
+        display: flex;
+        flex-direction: column; // Автор и дата располагаются вертикально
+            justify-content: space-between;
+        font-size: 14px;
+        color: #F9F8F3;
+    }
+
+    .page-container {
+        position: relative; // Для позиционирования кнопки
+        height: 100%; // Занимаем всю высоту экрана
+        display: flex;
+        justify-content: center; // Центрируем содержимое по горизонтали
+        align-items: center; // Центрируем содержимое по вертикали
+        color: #F9F8F3;
+      }
+      
+      .back-button {
+        position: absolute; // Абсолютное позиционирование
+        top: 20px; // Отступ сверху
+        left: 20px; // Отступ слева
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      
+      .center-content {
+        text-align: center;
+        max-width: 800px;
+        padding: 20px;
+      }
+      
+      .center-content h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+      }
+      
+      .center-content p {
+        font-family: 'Inter';
+        font-size: 18px;
+        line-height: 1.6;
+      }    
+
+      .logo{
+        cursor: pointer;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px; // Отступ между кнопками
+        margin-top: 20px; // Отступ сверху
+      
+        button {
+          padding: 8px 16px;
+          font-size: 16px;
+          color: #fff;
+          background-color: transparent;
+          border: 1px solid white;
+          border-radius: 20px;
+          cursor: pointer;
+      
+          &:disabled {
+            cursor: not-allowed;
+          }
+      
+          &:hover:not(:disabled) {
+            background-color: #0056b3;
+          }
+        }
+      
+        span {
+          font-size: 16px;
+          color: #fff;
+        }
+      }
+
+      .articleHtmlBack {
+        padding: 10%; 
+        color: white; 
+        font-size: 16px; 
+        line-height: 1.6;
+    
+        img {
+          max-width: 100%;
+          height: auto; 
+          display: block; 
+          margin: 20px auto; 
+          border-radius: 8px; 
+        }
+      
+        p {
+          margin-bottom: 20px; 
+      
+        h1, h2, h3, h4, h5, h6 {
+          margin-top: 30px;
+          margin-bottom: 15px;
+          color: #fff; 
+        }
+      
+        a {
+          color: #007bff; 
+          text-decoration: none;
+      
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+}
