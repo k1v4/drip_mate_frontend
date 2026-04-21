@@ -1,65 +1,129 @@
 html, body {
     margin: 0;
-    background-color: #F9F8F3;
+    background-color: #141414;
 }
 
+/* Layout */
 .root {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Левая часть (тёмная) */
+.left {
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100%;
+    padding: 80px;
+    background: #0A0A0A;
 
     h1 {
         font-family: 'Oswald', 'Inter', Courier, monospace;
-        color: #0E0F15;
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #A7B6C2;
     }
 
-    .form {
-        width: 60%;
+    p {
+        font-size: 18px;
+        max-width: 400px;
+        color: #cccccc;
 
-        // Стили для всех TextField внутри .form
-        .MuiTextField-root {
-            width: 65%;
-            margin-top: 16px;
-            margin-bottom: 8px;
+        &.secondary {
+            margin-top: 10px;
+            color: #888888;
+        }
+    }
+}
 
-            // Стили для внутреннего input
-            .MuiOutlinedInput-input {
-                background-color: #F0F0F0;
+/* Разделитель */
+.divider {
+    width: 1px;
+    height: 60%;
+    align-self: center;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(255, 255, 255, 0.15),
+        transparent
+    );
+}
+
+/* Правая часть (чуть светлее) */
+.right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0D0D0D;
+
+    
+    h6 {
+        font-family: 'Oswald', 'Inter', Courier, monospace;
+        color: #A7B6C2;
+    }
+}
+
+/* Форма */
+.form {
+    width: 100%;
+    max-width: 420px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    /* Текст */
+    p, .MuiTypography-root {
+        text-align: center;
+    }
+
+    /* Кнопки */
+    button {
+        width: 65%;
+        align-self: center;
+    }
+
+    /* Поля */
+    .MuiTextField-root {
+        width: 100%;
+        margin-top: 16px;
+        margin-bottom: 8px;
+
+        .MuiOutlinedInput-input {
+            background-color: #1E1E1E;  // тёмный фон
+            border-radius: 15px;
+            color: #E0E0E0;             // светлый текст
+
+            // фикс автофилла браузера
+            &:-webkit-autofill {
+                -webkit-box-shadow: 0 0 0 100px #1E1E1E inset !important;
+                -webkit-text-fill-color: #E0E0E0 !important;
+            }
+        }
+
+        .MuiOutlinedInput-root {
+            fieldset {
+                border-color: #555;
                 border-radius: 15px;
             }
 
-            // Стили для границы
-            .MuiOutlinedInput-root {
-                fieldset {
-                    border-color: #CCCCCC;
-                    border-radius: 15px;
-                }
-
-                &:hover fieldset {
-                    border-color: #000; // Чёрная обводка при наведении
-                }
-
-                &.Mui-focused fieldset {
-                    border-color: #000; // Чёрная обводка при фокусе
-                }
-
-                // Стили для текста при фокусе
-                &.Mui-focused .MuiOutlinedInput-input {
-                    color: #000; // Чёрный текст при фокусе
-                }
+            &:hover fieldset {
+                border-color: #888;
             }
 
-            // Стили для лейбла
-            .MuiInputLabel-root {
-                color: #000; // Чёрный цвет лейбла по умолчанию
+            &.Mui-focused fieldset {
+                border-color: #aaa;
+            }
+        }
 
-                // Стили для лейбла при фокусе
-                &.Mui-focused {
-                    color: #000; // Чёрный цвет лейбла при фокусе
-                }
+        .MuiInputLabel-root {
+            color: #aaa;
+
+            &.Mui-focused {
+                color: #E0E0E0;
             }
         }
     }

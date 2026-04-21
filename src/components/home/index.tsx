@@ -15,7 +15,7 @@ const MainHome = () => {
     return (
         <div className='homeRoot'>
             <header>
-                <h1 className='logo' onClick={() => navigate('/')}>CREPS HUB</h1>
+                <h1 className='logo' onClick={() => navigate('/')}>DRIP MATE</h1>
                 <div className='buttons'>
                     <Button
                         variant="contained"
@@ -40,7 +40,7 @@ const MainHome = () => {
                 </Box>
             </div>
             <footer>
-                <h1>CREPS HUB</h1>
+                <h1>DRIP MATE</h1>
             </footer>
         </div>
     );

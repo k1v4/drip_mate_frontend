@@ -56,7 +56,7 @@ const Profile = () => {
     <div className='profileRoot'>
       <header>
         <h1 className='logo-profile' onClick={() => navigate('/')}>
-          CREPS HUB
+          DRIP MATE
         </h1>
         <div className='switch-buttons'>
           <div className='radio-tile-group'>
