@@ -6,6 +6,8 @@
     box-sizing: border-box;
 }
 
+
+
 .profileRoot{
     width: 100%;
     height: 100%;
@@ -13,8 +15,36 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-
     background-color: #0E0F15;
+
+    .articlesItems {
+      margin: 5vh auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 90%;
+    }
+
+    .imageContainer {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .ratingContainer {
+      display: flex;
+      justify-content: center; // центр по горизонтали
+      align-items: center;     // центр по вертикали (если нужно)
+      width: 100%;
+      margin-top: 3vh;
+    }
+
+    .ratingContent {
+      width: 20vw;
+      min-width: 200px; 
+    }
 
     .logo-profile{
         display: flex;
@@ -223,87 +253,98 @@
         }
       }
 
-      .articleMain {
-        .buttonAdd {
-          display: flex;
-          justify-content: center;
-          align-items: center;
+    .articleMain {
+      .buttonAdd {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .articlesItems {
+        margin: 5vh auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); // 🔥 адаптив
+        gap: 24px;
+        width: 80%;
+      }
+
+      .item {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background-color: #16171f;
+        overflow: hidden;
+
+        transition: all 0.25s ease;
+
+        &:hover {
+          transform: translateY(-6px);
+          border-color: #F9F8F3;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
-      
-        .articlesItems {
-          margin: 5vh 5vw;
-          display: grid;
-          grid-template-columns: repeat(4, 1fr); // 4 колонки с равной шириной
-          gap: 16px;
-      
-          .item {
-            width: 100%; // Ширина элемента будет адаптироваться под размеры сетки
-            display: flex;
-            flex-direction: column; // Располагаем элементы вертикально
-            align-items: center;
+
+        .imageContainer {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1 / 1; // 🔥 современно
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+          }
+
+          .deleteIcon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
             cursor: pointer;
-            border-radius: 20px; // Скругление углов контейнера
-            background-color: transparent; // Фон контейнера (опционально)
-            overflow: hidden; // Скрываем всё, что выходит за пределы контейнера
-      
-            .imageContainer {
-              position: relative; // Для позиционирования иконки корзины
-              width: 100%; // Занимает всю ширину контейнера
-              padding-top: 100%; // Создаём квадратный контейнер (1:1 соотношение сторон)
-              background-color: #f0f0f0; // Фон для отладки (можно убрать)
-      
-              img {
-                position: absolute; // Абсолютное позиционирование внутри контейнера
-                top: 0;
-                left: 0;
-                width: 100%; // Занимает всю ширину контейнера
-                height: 100%; // Занимает всю высоту контейнера
-                object-fit: cover; // Сохраняет пропорции и обрезает лишнее
-                border-radius: 20px 20px 0 0; // Скругление углов только сверху
-              }
-      
-              .deleteIcon {
-                position: absolute; // Абсолютное позиционирование
-                top: 8px; // Отступ сверху
-                right: 8px; // Отступ справа
-                cursor: pointer; // Курсор в виде указателя
-                background-color: rgba(0, 0, 0, 0.5); // Полупрозрачный фон
-                padding: 4px; // Отступы вокруг иконки
-                border-radius: 50%; // Круглая форма
-                color: #fff; // Белый цвет иконки
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 32px; // Размер иконки
-                height: 32px; // Размер иконки
-                z-index: 1; // Чтобы иконка была поверх изображения
-      
-                &:hover {
-                  background-color: rgba(0, 0, 0, 0.8); // Затемнение при наведении
-                }
-      
-                svg {
-                  font-size: 20px; // Размер иконки
-                }
-              }
-            }
-      
-            p {
-              width: 100%; // Ширина текстового блока
-              padding: 8px; // Отступы для текста
-              font-size: 24px; // Размер текста
-              text-align: center; // Центрирует текст
-              color: #fff; // Белый цвет текста
-              font-family: 'Inter';
-              font-weight: 500;
-              margin: 0; // Убираем отступы
-              background-color: transparent; // Фон текстового блока (опционально)
-              border-radius: 0 0 20px 20px; // Скругление углов только снизу
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 4px;
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            z-index: 1;
+
+            &:hover {
+              background-color: rgba(255, 0, 0, 0.7); // 🔥 акцент
             }
           }
         }
+
+        &:hover .imageContainer img {
+          transform: scale(1.05); // 🔥 zoom эффект
+        }
+
+        p {
+          width: 100%;
+          padding: 12px;
+          font-size: 18px;
+          text-align: center;
+          color: #F9F8F3;
+          font-family: 'Inter';
+          font-weight: 500;
+          margin: 0;
+
+          background-color: #1c1d26; // 🔥 отделяет текст
+        }
       }
 
+      .paginationContainer {
+        display: flex;
+        justify-content: center;
+        margin-top: 24px;
+      }
+    }
     .addArticle{
         margin: 3%;  
         padding: 1vh 5vw;      

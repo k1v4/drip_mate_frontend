@@ -1,5 +1,5 @@
 import { Add } from '@mui/icons-material';
-import { Button } from '@mui/material';
+import { Button, Pagination } from '@mui/material';
 import React, { JSX, useEffect, useState } from 'react';
 import FashionWeekForm from './add';
 import { instance } from '../../../utils/axios';
@@ -13,156 +13,170 @@ interface Item {
   image_url: string;
 }
 
+const mockArticles: Item[] = [
+  { id: 1, name: 'Paris Fashion Week', image_url: 'https://picsum.photos/500?1' },
+  { id: 2, name: 'Streetwear Trends', image_url: 'https://picsum.photos/500?2' },
+  { id: 3, name: 'Minimal Style', image_url: 'https://picsum.photos/500?3' },
+  { id: 4, name: 'Sneaker Culture', image_url: 'https://picsum.photos/500?4' },
+  { id: 5, name: 'Luxury Looks', image_url: 'https://picsum.photos/500?5' },
+  { id: 6, name: 'Winter Fits', image_url: 'https://picsum.photos/500?6' },
+  { id: 7, name: 'Summer Outfits', image_url: 'https://picsum.photos/500?7' },
+  { id: 8, name: 'Monochrome', image_url: 'https://picsum.photos/500?8' },
+];
+
 const Articles: React.FC = (): JSX.Element => {
   const [items, setItems] = useState<Item[]>([]);
-  const [showHello, setShowHello] = useState<boolean>(false);
+  const [showHello, setShowHello] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const { getTokens, setTokens } = useAuth();
   const navigate = useNavigate();
 
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 6;
+
   const refreshTokens = async () => {
-    const tokens = getTokens(); 
-    try {
-      const response = await instance.post('http://localhost:8080/api/v1/refresh', {
-        refreshToken: tokens?.refreshToken, 
-      });
-      const newTokens = response.data; 
-      setTokens(newTokens); 
-      return newTokens;
-    } catch (error) {
-      console.error('Ошибка при обновлении токенов:', error);
-      throw error;
-    }
+    const tokens = getTokens();
+    const response = await instance.post('http://localhost:8080/api/v1/refresh', {
+      refreshToken: tokens?.refreshToken,
+    });
+    const newTokens = response.data;
+    setTokens(newTokens);
+    return newTokens;
   };
 
   const fetchArticles = async () => {
     const tokens = getTokens();
-    if (!tokens?.accessToken) {
-      console.error('Токен отсутствует');
-      return;
-    }
 
     try {
       const response = await instance.get('http://localhost:8082/api/v1/user_articles', {
-        headers: { Authorization: `Bearer ${tokens.accessToken}` },
+        headers: { Authorization: `Bearer ${tokens?.accessToken}` },
       });
+
       const fetchedItems = response.data.map((article: any) => ({
         id: article.id,
         name: article.name,
-        image_url: article.image_url
+        image_url: article.image_url,
       }));
-      setItems(fetchedItems);
-    } catch (error: any) {
-      console.log(error.response?.data?.message);
 
+      setItems(fetchedItems.length ? fetchedItems : mockArticles);
+    } catch (error: any) {
       if (error.response?.status === 401) {
         try {
-          // Обновляем токены
           const newTokens = await refreshTokens();
-
-          // Повторяем запрос с новым токеном
           const response = await instance.get('http://localhost:8082/api/v1/user_articles', {
             headers: { Authorization: `Bearer ${newTokens.accessToken}` },
           });
+
           const fetchedItems = response.data.map((article: any) => ({
             id: article.id,
             name: article.name,
             image_url: article.image_url,
           }));
-          setItems(fetchedItems);
-        } catch (refreshError) {
-          console.error('Ошибка при обновлении токенов или повторном запросе:', refreshError);
-          // Если обновление токенов не удалось, перенаправляем на страницу логина
+
+          setItems(fetchedItems.length ? fetchedItems : mockArticles);
+        } catch {
           navigate('/login');
         }
       } else {
-        console.error('Ошибка при загрузке статей:', error);
+        setItems(mockArticles);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchArticles();
-  }, []); // Убираем tokens из зависимостей
+    // 🔥 мгновенный UI
+    setItems(mockArticles);
 
-  // Обработчик нажатия на кнопку
+    // фоновая загрузка
+    fetchArticles();
+  }, []);
+
   const handleAddArticle = () => {
     setShowHello(!showHello);
   };
 
   const handleDelete = async (id: number) => {
     const tokens = getTokens();
-    if (!tokens?.accessToken) {
-      alert('Ошибка аутентификации. Пожалуйста, войдите снова.');
-      return;
-    }
+    if (!tokens?.accessToken) return;
 
     try {
-      const response = await fetch(`http://localhost:8082/api/v1/articles/${id}`, {
+      await fetch(`http://localhost:8082/api/v1/articles/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Ошибка при удалении статьи');
-      }
-
-      // Удаляем статью из списка
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
-      console.log('Статья успешно удалена');
-    } catch (error) {
-      console.error('Ошибка при удалении статьи:', error);
-      alert('Произошла ошибка при удалении статьи.');
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } catch {
+      alert('Ошибка при удалении');
     }
   };
+
+  const paginatedItems = items.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
 
   return (
     <div className='articleMain'>
       <div className='buttonAdd'>
         <Button
-          type='submit'
           sx={{
             fontFamily: 'Inter',
             width: '15vw',
             backgroundColor: '#F9F8F3',
             borderRadius: '15px',
-            borderColor: '#fff',
             color: '#0E0F15',
           }}
           variant='contained'
-          className='addShoes'
           endIcon={<Add />}
           onClick={handleAddArticle}
         >
           {showHello ? 'Показать статьи' : 'Добавить статью'}
         </Button>
       </div>
-      <div>
-        {showHello ? (
-          <FashionWeekForm />
-        ) : (
+
+      {showHello ? (
+        <FashionWeekForm />
+      ) : (
+        <>
           <div className='articlesItems'>
-            {items.map((item) => (
-              <div className='item' key={item.id} onClick={() => { navigate(`/article/${item.id}`) }}>
+            {paginatedItems.map((item) => (
+              <div
+                className='item'
+                key={item.id}
+                onClick={() => navigate(`/article/${item.id}`)}
+              >
                 <div className="imageContainer">
                   <img src={item.image_url} alt={item.name} />
                   <span
                     className="deleteIcon"
                     onClick={(e) => {
-                      e.stopPropagation(); // Останавливаем всплытие события
-                      handleDelete(item.id); // Вызываем функцию удаления
+                      e.stopPropagation();
+                      handleDelete(item.id);
                     }}
                   >
-                    <DeleteIcon /> {/* Иконка корзины из MUI */}
+                    <DeleteIcon />
                   </span>
                 </div>
                 <p>{item.name}</p>
               </div>
             ))}
           </div>
-        )}
-      </div>
+
+          <div className="paginationContainer">
+            <Pagination
+              count={Math.ceil(items.length / itemsPerPage)}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

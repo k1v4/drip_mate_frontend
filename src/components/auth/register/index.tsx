@@ -8,7 +8,7 @@ const RegisterPage: React.FC<IPropsRegister> = (props: IPropsRegister): JSX.Elem
   return (
     <>
       <Typography variant="h6" fontFamily='Inter' textAlign='center' color="#ddd">
-        Зарегистрируйтесь на нашем сайте, чтобы получить возможность оценивать статьи и публиковать их!
+        Зарегистрируйтесь на нашем сайте, чтобы получить возможность стать сваговей!
       </Typography>
 
       <TextField

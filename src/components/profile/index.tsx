@@ -59,40 +59,26 @@ const Profile = () => {
           DRIP MATE
         </h1>
         <div className='switch-buttons'>
-          <div className='radio-tile-group'>
-            <div className='input-container'>
-              <input id='profile' type='radio' name='radio' checked={selectedButton === 'profile'} onChange={handleChange} />
-              <div className='radio-tile'>
-                <label htmlFor='profile'>Профиль</label>
-              </div>
-            </div>
-
             <div className='input-container'>
               <input id='collection' type='radio' name='radio' checked={selectedButton === 'collection'} onChange={handleChange} />
               <div className='radio-tile'>
-                <label htmlFor='collection'>Коллекция</label>
+                <label htmlFor='collection'>Подбор</label>
               </div>
             </div>
 
             <div className='input-container'>
               <input id='myArticles' type='radio' name='radio' checked={selectedButton === 'myArticles'} onChange={handleChange} />
               <div className='radio-tile'>
-                <label htmlFor='myArticles'>Мои статьи</label>
+                <label htmlFor='myArticles'>Сохраненные образы</label>
               </div>
             </div>
 
-            <div className='input-container'>
-              <input id='calendar' type='radio' name='radio' checked={selectedButton === 'calendar'} onChange={handleChange} />
-              <div className='radio-tile'>
-                <label htmlFor='calendar'>Календарь релизов</label>
-              </div>
-            </div>
-
-            <div className='input-container'>
-              <input id='delete' type='radio' name='radio' checked={selectedButton === 'delete'} onChange={handleChange} />
-              <div className='radio-tile'>
-                <label htmlFor='delete'>Удалить Профиль</label>
-              </div>
+            <div className='radio-tile-group'>
+              <div className='input-container'>
+                <input id='profile' type='radio' name='radio' checked={selectedButton === 'profile'} onChange={handleChange} />
+                <div className='radio-tile'>
+                  <label htmlFor='profile'>Профиль</label>
+                </div>
             </div>
 
             {/* Показываем "Добавить релиз" только для access_id = 2 */}

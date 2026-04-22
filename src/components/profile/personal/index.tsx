@@ -7,45 +7,86 @@ const Personal: React.FC = (): JSX.Element => {
   const { getTokens } = useAuth();
   const tokens = getTokens();
 
-  const [formData, setFormData] = useState({
+  // 🔹 профиль
+  const [profileData, setProfileData] = useState({
+    username: '',
     name: '',
     surname: '',
-    username: '',
+    city: '',
     email: '',
-    password: ''
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // 🔹 пароль отдельно
+  const [passwordData, setPasswordData] = useState({
+    password: '',
+  });
+
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfileData({ ...profileData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+  };
+
+  // 🔹 обновление профиля
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tokens || !tokens.accessToken) {
-      alert('Пользователь не авторизован');
-      return;
-    }
+
+    if (!tokens?.accessToken) return;
+
     try {
-      await axios.put('http://localhost:8080/api/v1/users', formData, {
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-          'Content-Type': 'application/json'
+      await axios.put(
+        'http://localhost:8080/api/v1/users/profile',
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
-      alert('Данные успешно обновлены');
+      );
+
+      alert('Профиль обновлён');
     } catch (error) {
-      console.error('Ошибка при обновлении данных:', error);
-      alert('Ошибка обновления данных');
+      console.error(error);
+      alert('Ошибка обновления профиля');
+    }
+  };
+
+  // 🔹 смена пароля
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!tokens?.accessToken) return;
+
+    try {
+      await axios.put(
+        'http://localhost:8080/api/v1/users/password',
+        passwordData,
+        {
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      alert('Пароль обновлён');
+      setPasswordData({ password: '' });
+    } catch (error) {
+      console.error(error);
+      alert('Ошибка смены пароля');
     }
   };
 
   return (
     <div className='personalMain'>
-      <form className="formPersonal" onSubmit={handleSubmit}>
+
+      {/* ================= PROFILE ================= */}
+      <form className="formPersonal" onSubmit={handleProfileSubmit}>
         <Box
           display='flex'
-          justifyContent='center'
-          alignItems='center'
           flexDirection='column'
           maxWidth='55%'
           margin='auto'
@@ -53,78 +94,66 @@ const Personal: React.FC = (): JSX.Element => {
           borderRadius={5}
           bgcolor='#F9F8F3'
         >
-          <h1 className='personalDataHeader'>Ваши данные</h1>
+          <h2>Профиль</h2>
+
           <div className="userInfo">
-            <TextField
-              margin="normal"
-              label="Имя"
-              variant="outlined"
-              placeholder="Введите ваше имя"
-              fullWidth
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              label="Фамилия"
-              variant="outlined"
-              placeholder="Введите вашу фамилию"
-              fullWidth
-              name="surname"
-              value={formData.surname}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              label="Никнейм"
-              variant="outlined"
-              placeholder="Введите ваш никнейм"
-              fullWidth
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-            />
+            <TextField name="username" label="Username" fullWidth onChange={handleProfileChange} />
+            <TextField name="name" label="Имя" fullWidth onChange={handleProfileChange} />
+            <TextField name="surname" label="Фамилия" fullWidth onChange={handleProfileChange} />
+            <TextField name="city" label="Город" fullWidth onChange={handleProfileChange} />
+            <TextField name="email" label="Email" fullWidth onChange={handleProfileChange} />
           </div>
+
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              marginTop: 2,
+              backgroundColor: '#0E0F15',
+              color: '#F9F8F3',
+            }}
+          >
+            Сохранить профиль
+          </Button>
+        </Box>
+      </form>
+
+      {/* ================= PASSWORD ================= */}
+      <form className="formPersonal" onSubmit={handlePasswordSubmit}>
+        <Box
+          display='flex'
+          flexDirection='column'
+          maxWidth='55%'
+          margin='auto'
+          padding='2% 5%'
+          borderRadius={5}
+          bgcolor='#F9F8F3'
+          marginTop={3}
+        >
+          <h2>Безопасность</h2>
+
           <div className="userInfo">
-            <TextField 
-              type='password' 
-              margin='normal' 
-              label="Пароль" 
-              variant="outlined" 
-              placeholder='Введите ваш пароль' 
-              fullWidth
+            <TextField
+              type="password"
               name="password"
-              value={formData.password}
-              onChange={handleChange}
-            />
-            <TextField 
-              margin='normal' 
-              label="Электронная почта" 
-              variant="outlined" 
-              placeholder='Введите ваш email' 
+              label="Новый пароль"
               fullWidth
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={passwordData.password}
+              onChange={handlePasswordChange}
             />
-            <Button 
-              type='submit' 
-              sx={{
-                fontFamily: 'Inter',
-                marginTop: 1.5, 
-                width: '100%', 
-                backgroundColor: 'transparent', 
-                borderRadius: '15px', 
-                borderColor: '#0E0F15', 
-                color: '#0E0F15'
-              }} 
-              variant="contained"
-              className='submitUserProfileChanges'
-            >
-              Сохранить изменения
-            </Button>
           </div>
+
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              marginTop: 2,
+              backgroundColor: '#0E0F15',
+              color: '#F9F8F3',
+            }}
+          >
+            Сменить пароль
+          </Button>
         </Box>
       </form>
     </div>
