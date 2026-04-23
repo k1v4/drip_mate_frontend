@@ -5,8 +5,8 @@ import AddShoeForm from './add';
 import { instance } from '../../../utils/axios';
 import { useAuth } from '../../../context/AuthContext';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useNavigate } from 'react-router-dom'; // 👈 ДОБАВИЛИ
 
-// Тип для элемента коллекции
 interface Item {
   id: number;
   name: string;
@@ -17,6 +17,7 @@ const Selection: React.FC = (): JSX.Element => {
   const [items, setItems] = useState<Item[]>([]);
   const [showHello, setShowHello] = useState<boolean>(false);
   const { getTokens } = useAuth();
+  const navigate = useNavigate(); // 👈 ДОБАВИЛИ
 
   const [rating, setRating] = useState<number>(1);
 
@@ -51,66 +52,65 @@ const Selection: React.FC = (): JSX.Element => {
 
   const handleDelete = async (id: number) => {
     const tokens = getTokens();
-    if (!tokens?.accessToken) {
-      alert('Ошибка аутентификации. Пожалуйста, войдите снова.');
-      return;
-    }
+    if (!tokens?.accessToken) return;
 
     try {
-      const response = await fetch(`http://localhost:8081/api/v1/shoes/${id}`, {
+      await fetch(`http://localhost:8081/api/v1/shoes/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Ошибка при удалении статьи');
-      }
-
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+      setItems((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
-      console.error('Ошибка при удалении статьи:', error);
-      alert('Произошла ошибка при удалении статьи.');
+      console.error(error);
     }
   };
 
-  // slider handler
-  const handleRatingChange = (_: Event, value: number | number[]) => {
-    setRating(value as number);
+  // ================================
+  // 👇 MOCK API + NAVIGATE
+  // ================================
+  const handleSubmitRating = async () => {
+    console.log('Выбран рейтинг:', rating);
+
+    try {
+      // 🔥 mock API запрос
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      const mockResponse = {
+        outfitId: 123,
+        items: items,
+        rating,
+      };
+
+      console.log('mock response:', mockResponse);
+
+      // 👉 переход на outfit страницу
+      navigate('/outfit', {
+        state: mockResponse,
+      });
+
+    } catch (e) {
+      console.error('Ошибка формирования образа:', e);
+    }
   };
 
-  const handleSubmitRating = () => {
-    console.log('Выбран рейтинг:', rating);
-    // сюда потом можно вставить API запрос
+  const handleRatingChange = (_: Event, value: number | number[]) => {
+    setRating(value as number);
   };
 
   return (
     <div className='collectionMain'>
       <div className="ratingContainer">
         <div className="ratingContent">
-          <Typography
-            sx={{
-              color: '#F9F8F3',
-              fontFamily: 'Inter',
-              fontSize: '16px',
-              textAlign: 'center',
-              marginBottom: 1,
-            }}
-          >
+
+          <Typography sx={{ color: '#F9F8F3', textAlign: 'center', mb: 2, fontFamily: 'Inter', fontSize: '25px' }}>
             Выберите уровень формальности образа
           </Typography>
 
-          <Typography
-            sx={{
-              color: '#aaa',
-              fontSize: '12px',
-              textAlign: 'center',
-              marginBottom: 2,
-            }}
-          >
-            1 — неформально ·
-            5 — максимально формально
+          <Typography sx={{ color: '#aaa', fontSize: '12px', textAlign: 'center', mb: 2 }}>
+            1 — неформально · 5 — максимально формально
           </Typography>
 
           <Slider
@@ -127,7 +127,7 @@ const Selection: React.FC = (): JSX.Element => {
             variant="contained"
             fullWidth
             sx={{
-              marginTop: 2,
+              mt: 2,
               backgroundColor: '#F9F8F3',
               color: '#0E0F15',
               borderRadius: '12px',

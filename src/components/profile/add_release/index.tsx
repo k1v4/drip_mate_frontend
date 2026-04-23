@@ -97,7 +97,7 @@ const AddReleaseForm: React.FC = () => {
   };
 
   return (
-    <form className='addArticle'>
+    <form className='addItem'>
       <Box display="flex" flexDirection="column" alignItems="center">
 
         {/* ===== Фото ===== */}

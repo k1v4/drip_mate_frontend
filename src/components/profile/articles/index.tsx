@@ -37,21 +37,28 @@ const Outfits: React.FC = (): JSX.Element => {
 
   const refreshTokens = async () => {
     const tokens = getTokens();
-    const response = await instance.post('http://localhost:8080/api/v1/refresh', {
-      refreshToken: tokens?.refreshToken,
-    });
-    const newTokens = response.data;
-    setTokens(newTokens);
-    return newTokens;
+
+    const response = await instance.post(
+      'http://localhost:8080/api/v1/refresh',
+      {
+        refreshToken: tokens?.refreshToken,
+      }
+    );
+
+    setTokens(response.data);
+    return response.data;
   };
 
   const fetchArticles = async () => {
     const tokens = getTokens();
 
     try {
-      const response = await instance.get('http://localhost:8082/api/v1/user_articles', {
-        headers: { Authorization: `Bearer ${tokens?.accessToken}` },
-      });
+      const response = await instance.get(
+        'http://localhost:8082/api/v1/user_articles',
+        {
+          headers: { Authorization: `Bearer ${tokens?.accessToken}` },
+        }
+      );
 
       const fetchedItems = response.data.map((article: any) => ({
         id: article.id,
@@ -64,9 +71,13 @@ const Outfits: React.FC = (): JSX.Element => {
       if (error.response?.status === 401) {
         try {
           const newTokens = await refreshTokens();
-          const response = await instance.get('http://localhost:8082/api/v1/user_articles', {
-            headers: { Authorization: `Bearer ${newTokens.accessToken}` },
-          });
+
+          const response = await instance.get(
+            'http://localhost:8082/api/v1/user_articles',
+            {
+              headers: { Authorization: `Bearer ${newTokens.accessToken}` },
+            }
+          );
 
           const fetchedItems = response.data.map((article: any) => ({
             id: article.id,
@@ -91,7 +102,7 @@ const Outfits: React.FC = (): JSX.Element => {
     fetchArticles();
   }, []);
 
-  const handleAddArticle = () => {
+  const handleaddItem = () => {
     setShowHello(!showHello);
   };
 
@@ -129,20 +140,23 @@ const Outfits: React.FC = (): JSX.Element => {
               <div
                 className='item'
                 key={item.id}
-                onClick={() => navigate(`/article/${item.id}`)}
+                onClick={() => navigate(`/outfit/${item.id}`)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className="imageContainer">
                   <img src={item.image_url} alt={item.name} />
+
                   <span
                     className="deleteIcon"
                     onClick={(e) => {
-                      e.stopPropagation();
+                      e.stopPropagation(); // важно
                       handleDelete(item.id);
                     }}
                   >
                     <DeleteIcon />
                   </span>
                 </div>
+
                 <p>{item.name}</p>
               </div>
             ))}

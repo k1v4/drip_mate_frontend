@@ -80,7 +80,7 @@ const Profile = () => {
               <div className='input-container'>
                 <input id='add_item' type='radio' name='radio' checked={selectedButton === 'add_item'} onChange={handleChange} />
                 <div className='radio-tile'>
-                  <label htmlFor='add_item'>Добавить релиз</label>
+                  <label htmlFor='add_item'>Добавить предмет</label>
                 </div>
               </div>
             )}

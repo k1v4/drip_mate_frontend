@@ -86,7 +86,7 @@ const FashionWeekForm: React.FC = () => {
   };
 
   return (
-    <form className='addArticle'>
+    <form className='addItem'>
       <Box>
         <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
           <input
