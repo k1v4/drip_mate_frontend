@@ -5,6 +5,7 @@ import PrivateRoute from './utils/router/privateRoute';
 import AuthRootComponent from './components/auth';
 import Profile from './components/profile';
 import SelectResult from './components/auth copy';
+import Onboarding from './components/onboarding';
 
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route element={<PrivateRoute />}>
         </Route>
         {/* <Route path='/' element={<MainHome />}/> */}
+        <Route path='onboarding' element={<Onboarding />} />
         <Route path='outfit' element={<SelectResult />}/>
         <Route path='outfit/:id' element={<SelectResult />}/>
         <Route path='/' element={<Profile />}/>

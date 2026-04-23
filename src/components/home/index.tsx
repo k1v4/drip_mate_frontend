@@ -5,7 +5,6 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import './style.scss';
 import Add from '@mui/icons-material/Add';
 import { Box } from '@mui/material';
-import Home from './homePage';
 import GetArticlePage from './article';
 
 const MainHome = () => {
@@ -31,13 +30,6 @@ const MainHome = () => {
                 </div>
             </header>
             <div className='main'>
-                <Box>
-                    {location.pathname === '/' ? (
-                      <Home />
-                    ) : location.pathname.startsWith('/article/') ? (
-                      <GetArticlePage navigate={navigate}/>
-                    ) : null}
-                </Box>
             </div>
             <footer>
                 <h1>DRIP MATE</h1>
