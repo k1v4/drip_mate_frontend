@@ -13,7 +13,7 @@ interface Item {
   url: string;
 }
 
-const Collection: React.FC = (): JSX.Element => {
+const Selection: React.FC = (): JSX.Element => {
   const [items, setItems] = useState<Item[]>([]);
   const [showHello, setShowHello] = useState<boolean>(false);
   const { getTokens } = useAuth();
@@ -168,4 +168,4 @@ const Collection: React.FC = (): JSX.Element => {
   );
 };
 
-export default Collection;
+export default Selection;

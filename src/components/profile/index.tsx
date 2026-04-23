@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './style.scss';
 import Personal from './personal';
-import Collection from './collection';
-import Articles from './articles';
-import Calendar from './calendar';
-import DeleteProfile from './delete';
+import Selection from './collection';
+import Outfits from './articles';
 import AddReleaseForm from './add_release';
 
 const Profile = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedButton, setSelectedButton] = useState('profile');
+  const [selectedButton, setSelectedButton] = useState('selection');
   const [accessId, setAccessId] = useState<number | null>(null);
 
   // Получаем access_id из localStorage
@@ -37,15 +35,11 @@ const Profile = () => {
     switch (selectedButton) {
       case 'profile':
         return <Personal />;
-      case 'collection':
-        return <Collection />;
-      case 'myArticles':
-        return <Articles />;
-      case 'calendar':
-        return <Calendar />;
-      case 'delete':
-        return <DeleteProfile />;
-      case 'add_release':
+      case 'selection':
+        return <Selection />;
+      case 'myOutfits':
+        return <Outfits />;
+      case 'add_item':
         return accessId === 2 ? <AddReleaseForm /> : null; // Показываем только для access_id = 2
       default:
         return <div>Другой раздел</div>;
@@ -60,16 +54,16 @@ const Profile = () => {
         </h1>
         <div className='switch-buttons'>
             <div className='input-container'>
-              <input id='collection' type='radio' name='radio' checked={selectedButton === 'collection'} onChange={handleChange} />
+              <input id='selection' type='radio' name='radio' checked={selectedButton === 'selection'} onChange={handleChange} />
               <div className='radio-tile'>
-                <label htmlFor='collection'>Подбор</label>
+                <label htmlFor='selection'>Подбор</label>
               </div>
             </div>
 
             <div className='input-container'>
-              <input id='myArticles' type='radio' name='radio' checked={selectedButton === 'myArticles'} onChange={handleChange} />
+              <input id='myOutfits' type='radio' name='radio' checked={selectedButton === 'myOutfits'} onChange={handleChange} />
               <div className='radio-tile'>
-                <label htmlFor='myArticles'>Сохраненные образы</label>
+                <label htmlFor='myOutfits'>Сохраненные образы</label>
               </div>
             </div>
 
@@ -84,9 +78,9 @@ const Profile = () => {
             {/* Показываем "Добавить релиз" только для access_id = 2 */}
             {accessId === 2 && (
               <div className='input-container'>
-                <input id='add_release' type='radio' name='radio' checked={selectedButton === 'add_release'} onChange={handleChange} />
+                <input id='add_item' type='radio' name='radio' checked={selectedButton === 'add_item'} onChange={handleChange} />
                 <div className='radio-tile'>
-                  <label htmlFor='add_release'>Добавить релиз</label>
+                  <label htmlFor='add_item'>Добавить релиз</label>
                 </div>
               </div>
             )}

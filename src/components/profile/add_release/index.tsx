@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import { Button, TextField, Box } from '@mui/material';
+import {
+  Button,
+  TextField,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useAuth } from '../../../context/AuthContext'; // Импортируем useAuth для получения токена
+import { useAuth } from '../../../context/AuthContext';
 
 const AddReleaseForm: React.FC = () => {
-  const [title, setTitle] = useState<string>('');
-  const [releaseDate, setReleaseDate] = useState<string>(''); // Состояние для даты релиза
+  const { getTokens } = useAuth();
+
+  // ===== state =====
+  const [title, setTitle] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
-  const { getTokens } = useAuth(); // Получаем токены из контекста
 
-  // Обработчики изменений полей
-  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.target.value);
-  };
+  const [category, setCategory] = useState('');
+  const [season, setSeason] = useState('');
+  const [style, setStyle] = useState('');
+  const [formality, setFormality] = useState<number | ''>('');
 
-  const handleReleaseDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setReleaseDate(event.target.value); // Обновляем состояние даты
-  };
+  // ===== handlers =====
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -24,44 +31,36 @@ const AddReleaseForm: React.FC = () => {
     }
   };
 
-  // Функция для чтения файла как base64
   const readFileAsBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
-        const base64String = (reader.result as string).split(',')[1]; // Убираем префикс "data:image/..."
+        const base64String = (reader.result as string).split(',')[1];
         resolve(base64String);
       };
       reader.onerror = reject;
-      reader.readAsDataURL(file); // Читаем файл как Data URL
+      reader.readAsDataURL(file);
     });
   };
 
-  // Обработчик публикации
-  const handlePublish = async () => {
-    if (!photo) {
-      alert('Пожалуйста, загрузите фото.');
-      return;
-    }
+  // ===== submit =====
 
-    if (!releaseDate) {
-      alert('Пожалуйста, выберите дату релиза.');
-      return;
-    }
+  const handlePublish = async () => {
+    if (!photo) return alert('Загрузите фото');
+    if (!title) return alert('Введите название');
+    if (!category || !season || !style) return alert('Заполните все категории');
+    if (formality === '') return alert('Укажите уровень формальности');
 
     try {
-      // Читаем фото как base64
       const imageData = await readFileAsBase64(photo);
 
-      // Получаем JWT-токен
       const tokens = getTokens();
       if (!tokens?.accessToken) {
-        alert('Ошибка аутентификации. Пожалуйста, войдите снова.');
+        alert('Ошибка авторизации');
         return;
       }
 
-      // Отправляем данные на сервер
-      const response = await fetch('http://localhost:8083/api/v1/releases', {
+      const response = await fetch('http://localhost:8083/api/v1/items', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,39 +68,40 @@ const AddReleaseForm: React.FC = () => {
         },
         body: JSON.stringify({
           name: title,
-          release_date: releaseDate, // Используем выбранную дату
-          image_data: imageData, // Изображение в формате base64
-          image_name: photo.name, // Имя файла с расширением
+          category,
+          season,
+          style,
+          formality,
+          image_data: imageData,
+          image_name: photo.name,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Ошибка при отправке данных на сервер');
-      }
+      if (!response.ok) throw new Error();
 
-      const result = await response.json();
-      console.log('Успешно отправлено:', result);
-
-      // Очищаем форму после успешной отправки
+      alert('Успешно создано');
       handleCancel();
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Произошла ошибка при отправке данных.');
+    } catch (e) {
+      console.error(e);
+      alert('Ошибка при создании');
     }
   };
 
-  // Обработчик отмены
   const handleCancel = () => {
     setTitle('');
-    setReleaseDate('');
     setPhoto(null);
+    setCategory('');
+    setSeason('');
+    setStyle('');
+    setFormality('');
   };
 
   return (
     <form className='addArticle'>
-      <Box>
-        {/* Форма загрузки фото */}
-        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+      <Box display="flex" flexDirection="column" alignItems="center">
+
+        {/* ===== Фото ===== */}
+        <div style={{ marginBottom: '24px' }}>
           <input
             type="file"
             accept="image/*"
@@ -109,126 +109,112 @@ const AddReleaseForm: React.FC = () => {
             style={{ display: 'none' }}
             id="upload-photo"
           />
+
           <label htmlFor="upload-photo">
             <Box
               sx={{
-                width: '20vw', // Размер квадрата
-                height: '20vw', // Размер квадрата
-                backgroundColor: '#808080', // Серый цвет
+                width: '220px',
+                height: '220px',
+                backgroundColor: '#808080',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: '8px', // Скругление углов
+                borderRadius: '12px',
                 cursor: 'pointer',
-                border: '2px dashed #F9F8F3', // Пунктирная рамка
-                '&:hover': {
-                  backgroundColor: '#6b6b6b', // Цвет при наведении
-                },
+                border: '2px dashed #F9F8F3',
               }}
             >
-              <AddIcon sx={{ fontSize: '48px', color: '#F9F8F3' }} /> {/* Иконка плюса */}
+              <AddIcon sx={{ fontSize: '48px', color: '#F9F8F3' }} />
             </Box>
           </label>
         </div>
 
-        {/* Поле для названия */}
+        {/* ===== Название ===== */}
         <TextField
-          margin="normal"
-          label="Введите название релиза"
-          variant="outlined"
-          placeholder="Введите название релиза"
+          label="Название предмета"
           fullWidth
           value={title}
-          onChange={handleTitleChange}
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignContent: 'center',
-            backgroundColor: 'transparent',
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'transparent',
-              },
-              '&:hover fieldset': {
-                borderColor: 'transparent',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'transparent',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: '#F9F8F399',
-            },
-            '& .MuiInputBase-input': {
-              color: '#F9F8F399',
-            },
-          }}
+          onChange={(e) => setTitle(e.target.value)}
+          sx={{ marginBottom: 2, maxWidth: '400px' }}
         />
 
-        {/* Поле для выбора даты */}
+        {/* ===== CATEGORY ===== */}
+        <FormControl fullWidth sx={{ marginBottom: 2, maxWidth: '400px' }}>
+          <InputLabel>Категория</InputLabel>
+          <Select
+            value={category}
+            label="Категория"
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <MenuItem value="shoes">Обувь</MenuItem>
+            <MenuItem value="outerwear">Верхняя одежда</MenuItem>
+            <MenuItem value="pants">Брюки</MenuItem>
+            <MenuItem value="tshirt">Футболки</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* ===== SEASON ===== */}
+        <FormControl fullWidth sx={{ marginBottom: 2, maxWidth: '400px' }}>
+          <InputLabel>Сезон</InputLabel>
+          <Select
+            value={season}
+            label="Сезон"
+            onChange={(e) => setSeason(e.target.value)}
+          >
+            <MenuItem value="summer">Лето</MenuItem>
+            <MenuItem value="winter">Зима</MenuItem>
+            <MenuItem value="spring">Весна</MenuItem>
+            <MenuItem value="autumn">Осень</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* ===== STYLE ===== */}
+        <FormControl fullWidth sx={{ marginBottom: 2, maxWidth: '400px' }}>
+          <InputLabel>Стиль</InputLabel>
+          <Select
+            value={style}
+            label="Стиль"
+            onChange={(e) => setStyle(e.target.value)}
+          >
+            <MenuItem value="casual">Casual</MenuItem>
+            <MenuItem value="sport">Sport</MenuItem>
+            <MenuItem value="formal">Formal</MenuItem>
+            <MenuItem value="streetwear">Streetwear</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* ===== FORMALITY ===== */}
         <TextField
-          margin="normal"
-          label="Дата релиза"
-          type="date" // Тип поля — дата
-          variant="outlined"
+          label="Формальность (1-5)"
+          type="number"
+          inputProps={{ min: 1, max: 5 }}
           fullWidth
-          InputLabelProps={{
-            shrink: true, // Чтобы лейбл не накладывался на значение
-          }}
-          value={releaseDate}
-          onChange={handleReleaseDateChange}
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignContent: 'center',
-            backgroundColor: 'transparent',
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'transparent',
-              },
-              '&:hover fieldset': {
-                borderColor: 'transparent',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'transparent',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: '#F9F8F399',
-            },
-            '& .MuiInputBase-input': {
-              color: '#F9F8F399',
-            },
-          }}
+          value={formality}
+          onChange={(e) => setFormality(Number(e.target.value))}
+          sx={{ marginBottom: 3, maxWidth: '400px' }}
         />
 
-        {/* Кнопки */}
-        <div className='addButtons'>
+        {/* ===== BUTTONS ===== */}
+        <div className='addButtons' style={{ width: '400px' }}>
           <Button
-            className='add'
             variant="contained"
-            color="primary"
             onClick={handlePublish}
             sx={{
               backgroundColor: '#F9F8F3',
               color: '#0E0F15',
-              fontFamily: 'Inter',
-              borderRadius: '15px',
-              marginRight: '8px',
+              borderRadius: '12px',
             }}
           >
             Опубликовать
           </Button>
+
           <Button
-            className='cancel'
-            variant="contained"
-            color="primary"
+            variant="outlined"
             onClick={handleCancel}
             sx={{
-              backgroundColor: '#F9F8F3',
-              color: '#FFFFFF',
-              fontFamily: 'Inter',
-              borderRadius: '15px',
+              borderColor: '#F9F8F3',
+              color: '#F9F8F3',
+              borderRadius: '12px',
             }}
           >
             Отменить

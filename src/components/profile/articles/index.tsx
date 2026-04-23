@@ -24,7 +24,7 @@ const mockArticles: Item[] = [
   { id: 8, name: 'Monochrome', image_url: 'https://picsum.photos/500?8' },
 ];
 
-const Articles: React.FC = (): JSX.Element => {
+const Outfits: React.FC = (): JSX.Element => {
   const [items, setItems] = useState<Item[]>([]);
   const [showHello, setShowHello] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -87,10 +87,7 @@ const Articles: React.FC = (): JSX.Element => {
   };
 
   useEffect(() => {
-    // 🔥 мгновенный UI
     setItems(mockArticles);
-
-    // фоновая загрузка
     fetchArticles();
   }, []);
 
@@ -122,24 +119,7 @@ const Articles: React.FC = (): JSX.Element => {
   );
 
   return (
-    <div className='articleMain'>
-      <div className='buttonAdd'>
-        <Button
-          sx={{
-            fontFamily: 'Inter',
-            width: '15vw',
-            backgroundColor: '#F9F8F3',
-            borderRadius: '15px',
-            color: '#0E0F15',
-          }}
-          variant='contained'
-          endIcon={<Add />}
-          onClick={handleAddArticle}
-        >
-          {showHello ? 'Показать статьи' : 'Добавить статью'}
-        </Button>
-      </div>
-
+    <div className='outfitsMain'>
       {showHello ? (
         <FashionWeekForm />
       ) : (
@@ -181,4 +161,4 @@ const Articles: React.FC = (): JSX.Element => {
   );
 };
 
-export default Articles;
+export default Outfits;

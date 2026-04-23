@@ -21,7 +21,7 @@ const MainHome = () => {
                         variant="contained"
                         sx={{ background: 'white', color: '#0E0F15', borderRadius: '15px' }}
                         endIcon={<Add />}
-                        onClick={() => navigate('/profile', { state: { selectedTab: 'myArticles' } })}
+                        onClick={() => navigate('/profile', { state: { selectedTab: 'myOutfits' } })}
                     >
                         Опубликовать статью
                     </Button>

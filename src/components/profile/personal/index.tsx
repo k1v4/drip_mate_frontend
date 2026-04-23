@@ -16,24 +16,65 @@ const Personal: React.FC = (): JSX.Element => {
     email: '',
   });
 
-  // 🔹 пароль отдельно
+  // 🔹 безопасность
   const [passwordData, setPasswordData] = useState({
-    password: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
+  // ===== handlers =====
+
+  const handleDeleteProfile = async () => {
+  const confirmed = window.confirm('Вы уверены, что хотите удалить профиль? Это действие необратимо.');
+
+  if (!confirmed) return;
+
+  if (!tokens?.accessToken) {
+    alert('Пользователь не авторизован');
+    return;
+  }
+
+  try {
+    await axios.delete('http://localhost:8080/api/v1/users', {
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+      },
+    });
+
+    alert('Профиль удалён');
+
+    // 👉 здесь логично разлогинить пользователя
+    window.location.href = '/login';
+  } catch (error) {
+    console.error(error);
+    alert('Ошибка удаления профиля');
+  }
+};
+
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfileData({ ...profileData, [e.target.name]: e.target.value });
+    setProfileData({
+      ...profileData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    setPasswordData({
+      ...passwordData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  // 🔹 обновление профиля
+  // ===== submit профиль =====
+
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!tokens?.accessToken) return;
+    if (!tokens?.accessToken) {
+      alert('Пользователь не авторизован');
+      return;
+    }
 
     try {
       await axios.put(
@@ -54,16 +95,34 @@ const Personal: React.FC = (): JSX.Element => {
     }
   };
 
-  // 🔹 смена пароля
+  // ===== submit пароль =====
+
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!tokens?.accessToken) return;
+    if (!tokens?.accessToken) {
+      alert('Пользователь не авторизован');
+      return;
+    }
+
+    // 🔴 валидация
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('Пароли не совпадают');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      alert('Пароль должен быть не менее 6 символов');
+      return;
+    }
 
     try {
       await axios.put(
         'http://localhost:8080/api/v1/users/password',
-        passwordData,
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        },
         {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
@@ -73,7 +132,13 @@ const Personal: React.FC = (): JSX.Element => {
       );
 
       alert('Пароль обновлён');
-      setPasswordData({ password: '' });
+
+      // очистка формы
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
     } catch (error) {
       console.error(error);
       alert('Ошибка смены пароля');
@@ -83,7 +148,7 @@ const Personal: React.FC = (): JSX.Element => {
   return (
     <div className='personalMain'>
 
-      {/* ================= PROFILE ================= */}
+      {/* ===== ПРОФИЛЬ ===== */}
       <form className="formPersonal" onSubmit={handleProfileSubmit}>
         <Box
           display='flex'
@@ -97,11 +162,45 @@ const Personal: React.FC = (): JSX.Element => {
           <h2>Профиль</h2>
 
           <div className="userInfo">
-            <TextField name="username" label="Username" fullWidth onChange={handleProfileChange} />
-            <TextField name="name" label="Имя" fullWidth onChange={handleProfileChange} />
-            <TextField name="surname" label="Фамилия" fullWidth onChange={handleProfileChange} />
-            <TextField name="city" label="Город" fullWidth onChange={handleProfileChange} />
-            <TextField name="email" label="Email" fullWidth onChange={handleProfileChange} />
+            <TextField
+              name="username"
+              label="Username"
+              fullWidth
+              value={profileData.username}
+              onChange={handleProfileChange}
+            />
+
+            <TextField
+              name="name"
+              label="Имя"
+              fullWidth
+              value={profileData.name}
+              onChange={handleProfileChange}
+            />
+
+            <TextField
+              name="surname"
+              label="Фамилия"
+              fullWidth
+              value={profileData.surname}
+              onChange={handleProfileChange}
+            />
+
+            <TextField
+              name="city"
+              label="Город"
+              fullWidth
+              value={profileData.city}
+              onChange={handleProfileChange}
+            />
+
+            <TextField
+              name="email"
+              label="Email"
+              fullWidth
+              value={profileData.email}
+              onChange={handleProfileChange}
+            />
           </div>
 
           <Button
@@ -118,7 +217,7 @@ const Personal: React.FC = (): JSX.Element => {
         </Box>
       </form>
 
-      {/* ================= PASSWORD ================= */}
+      {/* ===== БЕЗОПАСНОСТЬ ===== */}
       <form className="formPersonal" onSubmit={handlePasswordSubmit}>
         <Box
           display='flex'
@@ -132,13 +231,35 @@ const Personal: React.FC = (): JSX.Element => {
         >
           <h2>Безопасность</h2>
 
-          <div className="userInfo">
+          <div className="passwordInfo">
             <TextField
               type="password"
-              name="password"
+              name="currentPassword"
+              label="Текущий пароль"
+              fullWidth
+              value={passwordData.currentPassword}
+              onChange={handlePasswordChange}
+            />
+          </div>
+
+          <div className="passwordInfo">
+            <TextField
+              type="password"
+              name="newPassword"
               label="Новый пароль"
               fullWidth
-              value={passwordData.password}
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
+            />
+          </div>
+
+          <div className="passwordInfo">
+            <TextField
+              type="password"
+              name="confirmPassword"
+              label="Повторите новый пароль"
+              fullWidth
+              value={passwordData.confirmPassword}
               onChange={handlePasswordChange}
             />
           </div>
@@ -156,6 +277,30 @@ const Personal: React.FC = (): JSX.Element => {
           </Button>
         </Box>
       </form>
+
+            <Box
+        display='flex'
+        justifyContent='center'
+        marginTop={5}
+        marginBottom={5}
+      >
+        <Button
+          variant="contained"
+          onClick={handleDeleteProfile}
+          sx={{
+            backgroundColor: '#ff4d4f',
+            color: '#fff',
+            borderRadius: '12px',
+            padding: '10px 24px',
+
+            '&:hover': {
+              backgroundColor: '#d9363e',
+            },
+          }}
+        >
+          Удалить профиль
+        </Button>
+      </Box>
     </div>
   );
 };
