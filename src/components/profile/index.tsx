@@ -5,6 +5,7 @@ import Personal from './personal';
 import Selection from './collection';
 import Outfits from './articles';
 import AddReleaseForm from './add_release';
+import CatalogList from './catalog';
 
 const Profile = () => {
   const location = useLocation();
@@ -39,6 +40,8 @@ const Profile = () => {
         return <Selection />;
       case 'myOutfits':
         return <Outfits />;
+      case 'catalog':
+        return <CatalogList /> 
       case 'add_item':
         return accessId === 2 ? <AddReleaseForm /> : null; // Показываем только для access_id = 2
       default:
@@ -81,6 +84,16 @@ const Profile = () => {
                 <input id='add_item' type='radio' name='radio' checked={selectedButton === 'add_item'} onChange={handleChange} />
                 <div className='radio-tile'>
                   <label htmlFor='add_item'>Добавить предмет</label>
+                </div>
+              </div>
+            )}
+
+            {/* Показываем "Добавить релиз" только для access_id = 2 */}
+            {accessId === 2 && (
+              <div className='input-container'>
+                <input id='catalog' type='radio' name='radio' checked={selectedButton === 'catalog'} onChange={handleChange} />
+                <div className='radio-tile'>
+                  <label htmlFor='catalog'>Добавить предмет</label>
                 </div>
               </div>
             )}
