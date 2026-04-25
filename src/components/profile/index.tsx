@@ -6,20 +6,16 @@ import Selection from './collection';
 import Outfits from './articles';
 import AddItemForm from './add_release';
 import CatalogList from './catalog';
+import { useAccessLevel } from '../../utils/hook';
 
 const Profile = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedButton, setSelectedButton] = useState('selection');
-  const [accessId, setAccessId] = useState<number | null>(null);
 
-  // Получаем access_id из localStorage
-  useEffect(() => {
-    const accessIdFromStorage = localStorage.getItem('access_id');
-    if (accessIdFromStorage) {
-      setAccessId(Number(accessIdFromStorage));
-    }
-  }, []);
+  // Читаем уровень доступа из Redux вместо localStorage
+  const accessLevel = useAccessLevel();
+  const isAdmin = accessLevel === 2;
 
   useEffect(() => {
     if (location.state?.selectedTab) {
@@ -28,7 +24,6 @@ const Profile = () => {
   }, [location.state]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Выбрана кнопка:', event.target.id);
     setSelectedButton(event.target.id);
   };
 
@@ -41,9 +36,9 @@ const Profile = () => {
       case 'myOutfits':
         return <Outfits />;
       case 'catalog':
-        return accessId === 2 ? <CatalogList /> : null; 
+        return isAdmin ? <CatalogList /> : null;
       case 'add_item':
-        return accessId === 2 ? <AddItemForm /> : null; // Показываем только для access_id = 2
+        return isAdmin ? <AddItemForm /> : null;
       default:
         return <div>Другой раздел</div>;
     }
@@ -56,30 +51,29 @@ const Profile = () => {
           DRIP MATE
         </h1>
         <div className='switch-buttons'>
+          <div className='input-container'>
+            <input id='selection' type='radio' name='radio' checked={selectedButton === 'selection'} onChange={handleChange} />
+            <div className='radio-tile'>
+              <label htmlFor='selection'>Подбор</label>
+            </div>
+          </div>
+
+          <div className='input-container'>
+            <input id='myOutfits' type='radio' name='radio' checked={selectedButton === 'myOutfits'} onChange={handleChange} />
+            <div className='radio-tile'>
+              <label htmlFor='myOutfits'>Сохраненные образы</label>
+            </div>
+          </div>
+
+          <div className='radio-tile-group'>
             <div className='input-container'>
-              <input id='selection' type='radio' name='radio' checked={selectedButton === 'selection'} onChange={handleChange} />
+              <input id='profile' type='radio' name='radio' checked={selectedButton === 'profile'} onChange={handleChange} />
               <div className='radio-tile'>
-                <label htmlFor='selection'>Подбор</label>
+                <label htmlFor='profile'>Профиль</label>
               </div>
             </div>
 
-            <div className='input-container'>
-              <input id='myOutfits' type='radio' name='radio' checked={selectedButton === 'myOutfits'} onChange={handleChange} />
-              <div className='radio-tile'>
-                <label htmlFor='myOutfits'>Сохраненные образы</label>
-              </div>
-            </div>
-
-            <div className='radio-tile-group'>
-              <div className='input-container'>
-                <input id='profile' type='radio' name='radio' checked={selectedButton === 'profile'} onChange={handleChange} />
-                <div className='radio-tile'>
-                  <label htmlFor='profile'>Профиль</label>
-                </div>
-            </div>
-
-            {/* Показываем "Добавить релиз" только для access_id = 2 */}
-            {accessId === 2 && (
+            {isAdmin && (
               <div className='input-container'>
                 <input id='add_item' type='radio' name='radio' checked={selectedButton === 'add_item'} onChange={handleChange} />
                 <div className='radio-tile'>
@@ -88,8 +82,7 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Показываем "Каталог" только для access_id = 2 */}
-            {accessId === 2 && (
+            {isAdmin && (
               <div className='input-container'>
                 <input id='catalog' type='radio' name='radio' checked={selectedButton === 'catalog'} onChange={handleChange} />
                 <div className='radio-tile'>

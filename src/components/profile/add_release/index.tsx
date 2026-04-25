@@ -18,15 +18,6 @@ function toggle<T>(arr: T[], item: T): T[] {
   return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 }
 
-function readFileAsBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve((reader.result as string).split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 // ── UI primitives (стиль онбординга) ──────────────────────────────────────
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -232,24 +223,24 @@ const AddItemForm: React.FC = () => {
     try {
       setLoading(true);
 
-      const imageData = await readFileAsBase64(photo);
-      const formalityNum = Number(formality) as unknown as number;
+      // Бэк использует c.FormFile("image") и c.Bind() — нужен multipart/form-data
+      const formData = new FormData();
+      formData.append('image',           photo);
+      formData.append('name',            title);
+      formData.append('category_id',     categoryId);
+      formData.append('season_id',       seasonId);
+      formData.append('gender',          gender);
+      formData.append('material',        material);
+      formData.append('formality_level', formality);
+      // массивы — каждый элемент отдельным append под одним ключом
+      styleIds.forEach((id) => formData.append('style_ids', String(id)));
+      colorIds.forEach((id) => formData.append('color_ids', String(id)));
 
+      // Content-Type НЕ выставляем вручную — браузер сам добавит boundary
       const response = await fetch('http://localhost:8080/api/v1/catalog', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          name:            title,
-          category_id:     Number(categoryId),
-          season_id:       Number(seasonId),
-          gender:          gender,
-          material:        material,
-          formality_level: formalityNum,
-          image_url:       imageData,        // base64, если бэк так ожидает
-          style_ids:       styleIds,
-          color_ids:       colorIds,
-        }),
+        body: formData,
       });
 
       if (response.status !== 201) throw new Error();

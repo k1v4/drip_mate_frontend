@@ -5,6 +5,11 @@ export const useAppDispatch: () => AppDispatch = useDispatch
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
 export const useAuth = () => {
-    const {isLogged} = useAppSelector((state) => state.auth)
+    const { isLogged } = useAppSelector((state) => state.auth)
     return isLogged
+}
+
+export const useAccessLevel = () => {
+    const { accessLevel } = useAppSelector((state) => state.auth)
+    return accessLevel
 }

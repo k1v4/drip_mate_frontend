@@ -14,7 +14,8 @@ export interface IPropsRegister{
 
 export interface IAuthState{
     user: IPublicUser,
-    isLogged: boolean
+    isLogged: boolean,
+    accessLevel: number | null
 }
 
 export interface IPublicUser{

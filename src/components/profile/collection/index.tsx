@@ -14,60 +14,10 @@ interface Item {
 }
 
 const Selection: React.FC = (): JSX.Element => {
-  const [items, setItems] = useState<Item[]>([]);
-  const [showHello, setShowHello] = useState<boolean>(false);
-  const { getTokens } = useAuth();
   const navigate = useNavigate();
 
   const [rating, setRating] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    const tokens = getTokens();
-    if (!tokens?.accessToken) return;
-
-    const fetchShoes = async () => {
-      try {
-        const response = await instance.get('http://localhost:8081/api/v1/shoes', {
-          headers: { Authorization: `Bearer ${tokens.accessToken}` },
-        });
-
-        const fetchedItems = response.data.shoes.map((shoe: any) => ({
-          id: shoe.shoeId,
-          name: shoe.name,
-          url: shoe.imageUrl,
-        }));
-
-        setItems(fetchedItems);
-      } catch (error) {
-        console.error('Ошибка при загрузке обуви:', error);
-      }
-    };
-
-    fetchShoes();
-  }, [getTokens]);
-
-  const handleAddShoe = () => {
-    setShowHello(!showHello);
-  };
-
-  const handleDelete = async (id: number) => {
-    const tokens = getTokens();
-    if (!tokens?.accessToken) return;
-
-    try {
-      await fetch(`http://localhost:8081/api/v1/shoes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-        },
-      });
-
-      setItems((prev) => prev.filter((item) => item.id !== id));
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const handleSubmitRating = async () => {
     if (loading) return;
@@ -136,32 +86,6 @@ const Selection: React.FC = (): JSX.Element => {
             {loading ? 'Подбираем...' : 'Подобрать образ'}
           </Button>
         </div>
-      </div>
-
-      <div>
-        {showHello ? (
-          <AddShoeForm />
-        ) : (
-          <div className="collectionItems">
-            {items.map((item) => (
-              <div className="item" key={item.id}>
-                <div className="imageContainer">
-                  <img src={item.url} alt={item.name} />
-                  <span
-                    className="deleteIcon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(item.id);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </span>
-                </div>
-                <p>{item.name}</p>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

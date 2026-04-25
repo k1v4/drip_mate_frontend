@@ -35,16 +35,9 @@ const Personal: React.FC = (): JSX.Element => {
 
     if (!confirmed) return;
 
-    if (!tokens?.accessToken) {
-      alert('Пользователь не авторизован');
-      return;
-    }
-
     try {
       await axios.delete('http://localhost:8080/api/v1/users', {
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-        },
+        withCredentials: true,
       });
 
       alert('Профиль удалён');
@@ -74,11 +67,6 @@ const Personal: React.FC = (): JSX.Element => {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!tokens?.accessToken) {
-      alert('Пользователь не авторизован');
-      return;
-    }
-
     try {
       const response = await axios.patch(
         'http://localhost:8080/api/v1/me/profile',
@@ -90,9 +78,9 @@ const Personal: React.FC = (): JSX.Element => {
         },
         {
           headers: {
-            Authorization: `Bearer ${tokens.accessToken}`,
             'Content-Type': 'application/json',
           },
+          withCredentials: true,
         }
       );
 
@@ -121,11 +109,6 @@ const Personal: React.FC = (): JSX.Element => {
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!tokens?.accessToken) {
-      alert('Пользователь не авторизован');
-      return;
-    }
-
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('Пароли не совпадают');
       return;
@@ -145,9 +128,9 @@ const Personal: React.FC = (): JSX.Element => {
         },
         {
           headers: {
-            Authorization: `Bearer ${tokens.accessToken}`,
             'Content-Type': 'application/json',
           },
+          withCredentials: true,
         }
       );
 
@@ -300,7 +283,7 @@ const Personal: React.FC = (): JSX.Element => {
       </form>
 
       {/* ===== DELETE ===== */}
-      <Box
+      {/* <Box
         display='flex'
         justifyContent='center'
         marginTop={5}
@@ -319,7 +302,7 @@ const Personal: React.FC = (): JSX.Element => {
         >
           Удалить профиль
         </Button>
-      </Box>
+      </Box> */}
     </div>
   );
 };
