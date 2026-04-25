@@ -7,6 +7,9 @@ const Personal: React.FC = (): JSX.Element => {
   const { getTokens } = useAuth();
   const tokens = getTokens();
 
+  // предполагаем, что id есть в токене
+  const userId = (tokens as any)?.userId;
+
   // 🔹 профиль
   const [profileData, setProfileData] = useState({
     username: '',
@@ -26,31 +29,31 @@ const Personal: React.FC = (): JSX.Element => {
   // ===== handlers =====
 
   const handleDeleteProfile = async () => {
-  const confirmed = window.confirm('Вы уверены, что хотите удалить профиль? Это действие необратимо.');
+    const confirmed = window.confirm(
+      'Вы уверены, что хотите удалить профиль? Это действие необратимо.'
+    );
 
-  if (!confirmed) return;
+    if (!confirmed) return;
 
-  if (!tokens?.accessToken) {
-    alert('Пользователь не авторизован');
-    return;
-  }
+    if (!tokens?.accessToken) {
+      alert('Пользователь не авторизован');
+      return;
+    }
 
-  try {
-    await axios.delete('http://localhost:8080/api/v1/users', {
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`,
-      },
-    });
+    try {
+      await axios.delete('http://localhost:8080/api/v1/users', {
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`,
+        },
+      });
 
-    alert('Профиль удалён');
-
-    // 👉 здесь логично разлогинить пользователя
-    window.location.href = '/login';
-  } catch (error) {
-    console.error(error);
-    alert('Ошибка удаления профиля');
-  }
-};
+      alert('Профиль удалён');
+      window.location.href = '/login';
+    } catch (error) {
+      console.error(error);
+      alert('Ошибка удаления профиля');
+    }
+  };
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfileData({
@@ -66,7 +69,7 @@ const Personal: React.FC = (): JSX.Element => {
     });
   };
 
-  // ===== submit профиль =====
+  // ===== PATCH /me/profile =====
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,51 +80,13 @@ const Personal: React.FC = (): JSX.Element => {
     }
 
     try {
-      await axios.put(
-        'http://localhost:8080/api/v1/users/profile',
-        profileData,
+      const response = await axios.patch(
+        'http://localhost:8080/api/v1/me/profile',
         {
-          headers: {
-            Authorization: `Bearer ${tokens.accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      alert('Профиль обновлён');
-    } catch (error) {
-      console.error(error);
-      alert('Ошибка обновления профиля');
-    }
-  };
-
-  // ===== submit пароль =====
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!tokens?.accessToken) {
-      alert('Пользователь не авторизован');
-      return;
-    }
-
-    // 🔴 валидация
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Пароли не совпадают');
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      alert('Пароль должен быть не менее 6 символов');
-      return;
-    }
-
-    try {
-      await axios.put(
-        'http://localhost:8080/api/v1/users/password',
-        {
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword,
+          id: userId,
+          name: profileData.name,
+          surname: profileData.surname,
+          username: profileData.username,
         },
         {
           headers: {
@@ -131,14 +96,70 @@ const Personal: React.FC = (): JSX.Element => {
         }
       );
 
-      alert('Пароль обновлён');
+      if (response.status === 200) {
+        const user = response.data.user;
 
-      // очистка формы
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
+        // 🔥 синхронизация UI с бэком
+        setProfileData({
+          username: user.username,
+          name: user.name,
+          surname: user.surname,
+          city: user.city,
+          email: user.email,
+        });
+
+        alert('Профиль обновлён');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Ошибка обновления профиля');
+    }
+  };
+
+  // ===== POST /auth/change-password =====
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!tokens?.accessToken) {
+      alert('Пользователь не авторизован');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('Пароли не совпадают');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 10) {
+      alert('Пароль должен быть не менее 10 символов');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:8080/api/v1/auth/change-password',
+        {
+          curr_password: passwordData.currentPassword,
+          new_password: passwordData.newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert('Пароль обновлён');
+
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      }
     } catch (error) {
       console.error(error);
       alert('Ошибка смены пароля');
@@ -278,7 +299,8 @@ const Personal: React.FC = (): JSX.Element => {
         </Box>
       </form>
 
-            <Box
+      {/* ===== DELETE ===== */}
+      <Box
         display='flex'
         justifyContent='center'
         marginTop={5}
@@ -292,10 +314,7 @@ const Personal: React.FC = (): JSX.Element => {
             color: '#fff',
             borderRadius: '12px',
             padding: '10px 24px',
-
-            '&:hover': {
-              backgroundColor: '#d9363e',
-            },
+            '&:hover': { backgroundColor: '#d9363e' },
           }}
         >
           Удалить профиль
