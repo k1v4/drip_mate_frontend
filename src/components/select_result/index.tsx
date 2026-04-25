@@ -10,7 +10,6 @@ type OutfitItem = {
   imageUrl: string;
 };
 
-// Тип который приходит с бэка (Catalog[])
 interface CatalogItem {
   id: string;
   name: string;
@@ -29,24 +28,61 @@ const SelectResult: React.FC = (): JSX.Element => {
   const isDetailMode = Boolean(id);
 
   useEffect(() => {
-    const catalogItems: CatalogItem[] = location.state ?? [];
+    if (isDetailMode) {
+      // Если items уже переданы из Outfits — используем их, запрос не делаем
+      const stateItems = location.state?.items;
+      if (stateItems?.length) {
+        setItems(stateItems.map((item: any) => ({
+          id:       item.id,
+          name:     item.name,
+          category: item.material ?? '',
+          season:   '',
+          imageUrl: item.image,
+        })));
+        return;
+      }
 
-    setItems(
-      catalogItems.map((item) => ({
-        id: item.id,
-        name: item.name,
-        category: item.category,
-        season: item.season,
-        imageUrl: item.image_url,
-      }))
-    );
-  }, [location.state]);
+      // Фолбэк: прямой переход по URL — грузим с бэка
+      const fetchOutfit = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/api/v1/users/outfit/${id}`, {
+            credentials: 'include',
+          });
+          if (!response.ok) throw new Error();
+          const data = await response.json();
+          setItems(
+            (data.items ?? []).map((item: any) => ({
+              id:       item.id,
+              name:     item.name,
+              category: item.material ?? '',
+              season:   '',
+              imageUrl: item.image,
+            }))
+          );
+        } catch (e) {
+          console.error('Ошибка загрузки образа:', e);
+        }
+      };
+      fetchOutfit();
+    } else {
+      // Режим рекомендации — данные из location.state
+      const catalogItems: CatalogItem[] = location.state ?? [];
+      setItems(
+        catalogItems.map((item) => ({
+          id:       item.id,
+          name:     item.name,
+          category: item.category,
+          season:   item.season,
+          imageUrl: item.image_url,
+        }))
+      );
+    }
+  }, [id, isDetailMode, location.state]);
 
   const handleSaveOutfit = async () => {
     if (saving) return;
     try {
       setSaving(true);
-
       const response = await fetch('http://localhost:8080/api/v1/users/outfit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,9 +92,7 @@ const SelectResult: React.FC = (): JSX.Element => {
           catalog_item_ids: items.map((item) => item.id),
         }),
       });
-
       if (!response.ok) throw new Error();
-
       navigate('/');
     } catch (e) {
       console.error('Ошибка сохранения образа:', e);
@@ -69,35 +103,22 @@ const SelectResult: React.FC = (): JSX.Element => {
 
   const handleDeleteOutfit = async () => {
     try {
-      console.log('delete outfit id:', id);
-
-      // заглушка API
-      await new Promise((res) => setTimeout(res, 500));
-
-      alert(`Образ ${id} удалён`);
-
+      const response = await fetch(`http://localhost:8080/api/v1/users/outfit/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (response.status !== 204) throw new Error();
       navigate('/');
     } catch (e) {
-      console.error(e);
+      console.error('Ошибка удаления образа:', e);
     }
   };
 
   return (
     <div className="outfitRoot">
-
-      {/* HEADER */}
       <div className="outfitHeader">
-        <h1 onClick={() => navigate('/')} className="logo">
-          DRIP MATE
-        </h1>
-
-        <p>
-          {isDetailMode
-            ? `Просмотр образа #${id}`
-            : 'Собранные предметы под твой стиль'}
-        </p>
-
-        {/* SAVE / DELETE */}
+        <h1 onClick={() => navigate('/')} className="logo">DRIP MATE</h1>
+        <p>{isDetailMode ? 'Просмотр образа' : 'Собранные предметы под твой стиль'}</p>
         {!isDetailMode ? (
           <button
             className="saveButton"
@@ -114,14 +135,12 @@ const SelectResult: React.FC = (): JSX.Element => {
         )}
       </div>
 
-      {/* GRID */}
       <div className="outfitGrid">
         {items.map((item) => (
           <div className="outfitCard" key={item.id}>
             <div className="imageWrapper">
               <img src={item.imageUrl} alt={item.name} />
             </div>
-
             <div className="info">
               <h3>{item.name}</h3>
               <p>{item.category}</p>
@@ -130,7 +149,6 @@ const SelectResult: React.FC = (): JSX.Element => {
           </div>
         ))}
       </div>
-
     </div>
   );
 };

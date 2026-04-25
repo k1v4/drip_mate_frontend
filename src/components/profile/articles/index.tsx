@@ -1,24 +1,27 @@
-import { Add } from '@mui/icons-material';
 import { Button, Pagination } from '@mui/material';
 import React, { JSX, useEffect, useState } from 'react';
 import FashionWeekForm from './add';
-import { instance } from '../../../utils/axios';
-import { useAuth } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-interface Item {
-  id: string;   // uuid
+interface OutfitItem {
+  id: string;
   name: string;
-  image_url: string;
+  image: string;
+  material: string;
+}
+
+interface Outfit {
+  id: string;
+  name: string;
+  items: OutfitItem[];
 }
 
 const Outfits: React.FC = (): JSX.Element => {
-  const [items, setItems] = useState<Item[]>([]);
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [showHello, setShowHello] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const { getTokens, setTokens } = useAuth();
   const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
@@ -33,16 +36,8 @@ const Outfits: React.FC = (): JSX.Element => {
 
       if (!response.ok) throw new Error();
 
-      const data = await response.json();
-
-      const fetchedItems: Item[] = data.map((outfit: any) => ({
-        id: outfit.id,
-        name: outfit.name,
-        // фото первого предмета из образа, если есть
-        image_url: outfit.items?.[0]?.image ?? '',
-      }));
-
-      setItems(fetchedItems);
+      const data: Outfit[] = await response.json();
+      setOutfits(data);
     } catch (error) {
       console.error('Ошибка при загрузке образов:', error);
     } finally {
@@ -67,13 +62,18 @@ const Outfits: React.FC = (): JSX.Element => {
 
       if (response.status !== 204) throw new Error();
 
-      setItems((prev) => prev.filter((item) => item.id !== id));
+      setOutfits((prev) => prev.filter((o) => o.id !== id));
     } catch {
       console.error('Ошибка при удалении образа');
     }
   };
 
-  const paginatedItems = items.slice(
+  const handleClick = (outfit: Outfit) => {
+    // прокидываем items конкретного образа — новый запрос не нужен
+    navigate(`/outfit/${outfit.id}`, { state: { items: outfit.items } });
+  };
+
+  const paginatedOutfits = outfits.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
@@ -85,35 +85,35 @@ const Outfits: React.FC = (): JSX.Element => {
       ) : (
         <>
           <div className='articlesItems'>
-            {paginatedItems.map((item) => (
+            {paginatedOutfits.map((outfit) => (
               <div
                 className='item'
-                key={item.id}
-                onClick={() => navigate(`/outfit/${item.id}`)}
+                key={outfit.id}
+                onClick={() => handleClick(outfit)}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="imageContainer">
-                  <img src={item.image_url} alt={item.name} />
+                  <img src={outfit.items?.[0]?.image ?? ''} alt={outfit.name} />
 
                   <span
                     className="deleteIcon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(item.id);
+                      handleDelete(outfit.id);
                     }}
                   >
                     <DeleteIcon />
                   </span>
                 </div>
 
-                <p>{item.name}</p>
+                <p>{outfit.name}</p>
               </div>
             ))}
           </div>
 
           <div className="paginationContainer">
             <Pagination
-              count={Math.ceil(items.length / itemsPerPage)}
+              count={Math.ceil(outfits.length / itemsPerPage)}
               page={page}
               onChange={(_, value) => setPage(value)}
             />
