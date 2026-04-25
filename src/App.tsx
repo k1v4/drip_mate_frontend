@@ -6,7 +6,6 @@ import AuthRootComponent from './components/auth';
 import Profile from './components/profile';
 import SelectResult from './components/select_result';
 import Onboarding from './components/onboarding';
-import CatalogList from './components/profile/catalog';
 
 
 

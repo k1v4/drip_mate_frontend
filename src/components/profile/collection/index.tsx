@@ -5,7 +5,7 @@ import AddShoeForm from './add';
 import { instance } from '../../../utils/axios';
 import { useAuth } from '../../../context/AuthContext';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from 'react-router-dom'; // 👈 ДОБАВИЛИ
+import { useNavigate } from 'react-router-dom';
 
 interface Item {
   id: number;
@@ -17,9 +17,10 @@ const Selection: React.FC = (): JSX.Element => {
   const [items, setItems] = useState<Item[]>([]);
   const [showHello, setShowHello] = useState<boolean>(false);
   const { getTokens } = useAuth();
-  const navigate = useNavigate(); // 👈 ДОБАВИЛИ
+  const navigate = useNavigate();
 
   const [rating, setRating] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const tokens = getTokens();
@@ -68,31 +69,27 @@ const Selection: React.FC = (): JSX.Element => {
     }
   };
 
-  // ================================
-  // 👇 MOCK API + NAVIGATE
-  // ================================
   const handleSubmitRating = async () => {
-    console.log('Выбран рейтинг:', rating);
-
+    if (loading) return;
     try {
-      // 🔥 mock API запрос
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      setLoading(true);
 
-      const mockResponse = {
-        outfitId: 123,
-        items: items,
-        rating,
-      };
-
-      console.log('mock response:', mockResponse);
-
-      // 👉 переход на outfit страницу
-      navigate('/outfit', {
-        state: mockResponse,
+      const response = await fetch('http://localhost:8080/api/v1/recommendation', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ formality: rating }),
       });
 
+      if (!response.ok) throw new Error();
+
+      const outfitItems = await response.json();
+
+      navigate('/outfit', { state: outfitItems });
     } catch (e) {
       console.error('Ошибка формирования образа:', e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,15 +123,17 @@ const Selection: React.FC = (): JSX.Element => {
           <Button
             variant="contained"
             fullWidth
+            disabled={loading}
             sx={{
               mt: 2,
               backgroundColor: '#F9F8F3',
               color: '#0E0F15',
               borderRadius: '12px',
+              opacity: loading ? 0.6 : 1,
             }}
             onClick={handleSubmitRating}
           >
-            Подобрать образ
+            {loading ? 'Подбираем...' : 'Подобрать образ'}
           </Button>
         </div>
       </div>

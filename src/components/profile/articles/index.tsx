@@ -8,21 +8,10 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 interface Item {
-  id: number;
+  id: string;   // uuid
   name: string;
   image_url: string;
 }
-
-const mockArticles: Item[] = [
-  { id: 1, name: 'Paris Fashion Week', image_url: 'https://picsum.photos/500?1' },
-  { id: 2, name: 'Streetwear Trends', image_url: 'https://picsum.photos/500?2' },
-  { id: 3, name: 'Minimal Style', image_url: 'https://picsum.photos/500?3' },
-  { id: 4, name: 'Sneaker Culture', image_url: 'https://picsum.photos/500?4' },
-  { id: 5, name: 'Luxury Looks', image_url: 'https://picsum.photos/500?5' },
-  { id: 6, name: 'Winter Fits', image_url: 'https://picsum.photos/500?6' },
-  { id: 7, name: 'Summer Outfits', image_url: 'https://picsum.photos/500?7' },
-  { id: 8, name: 'Monochrome', image_url: 'https://picsum.photos/500?8' },
-];
 
 const Outfits: React.FC = (): JSX.Element => {
   const [items, setItems] = useState<Item[]>([]);
@@ -35,92 +24,52 @@ const Outfits: React.FC = (): JSX.Element => {
   const [page, setPage] = useState(1);
   const itemsPerPage = 6;
 
-  const refreshTokens = async () => {
-    const tokens = getTokens();
-
-    const response = await instance.post(
-      'http://localhost:8080/api/v1/refresh',
-      {
-        refreshToken: tokens?.refreshToken,
-      }
-    );
-
-    setTokens(response.data);
-    return response.data;
-  };
-
-  const fetchArticles = async () => {
-    const tokens = getTokens();
-
+  const fetchOutfits = async () => {
     try {
-      const response = await instance.get(
-        'http://localhost:8082/api/v1/user_articles',
-        {
-          headers: { Authorization: `Bearer ${tokens?.accessToken}` },
-        }
-      );
+      const response = await fetch('http://localhost:8080/api/v1/users/outfit', {
+        method: 'GET',
+        credentials: 'include',
+      });
 
-      const fetchedItems = response.data.map((article: any) => ({
-        id: article.id,
-        name: article.name,
-        image_url: article.image_url,
+      if (!response.ok) throw new Error();
+
+      const data = await response.json();
+
+      const fetchedItems: Item[] = data.map((outfit: any) => ({
+        id: outfit.id,
+        name: outfit.name,
+        // фото первого предмета из образа, если есть
+        image_url: outfit.items?.[0]?.image ?? '',
       }));
 
-      setItems(fetchedItems.length ? fetchedItems : mockArticles);
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        try {
-          const newTokens = await refreshTokens();
-
-          const response = await instance.get(
-            'http://localhost:8082/api/v1/user_articles',
-            {
-              headers: { Authorization: `Bearer ${newTokens.accessToken}` },
-            }
-          );
-
-          const fetchedItems = response.data.map((article: any) => ({
-            id: article.id,
-            name: article.name,
-            image_url: article.image_url,
-          }));
-
-          setItems(fetchedItems.length ? fetchedItems : mockArticles);
-        } catch {
-          navigate('/login');
-        }
-      } else {
-        setItems(mockArticles);
-      }
+      setItems(fetchedItems);
+    } catch (error) {
+      console.error('Ошибка при загрузке образов:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    setItems(mockArticles);
-    fetchArticles();
+    fetchOutfits();
   }, []);
 
   const handleaddItem = () => {
     setShowHello(!showHello);
   };
 
-  const handleDelete = async (id: number) => {
-    const tokens = getTokens();
-    if (!tokens?.accessToken) return;
-
+  const handleDelete = async (id: string) => {
     try {
-      await fetch(`http://localhost:8082/api/v1/articles/${id}`, {
+      const response = await fetch(`http://localhost:8080/api/v1/users/outfit/${id}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-        },
+        credentials: 'include',
       });
+
+      if (response.status !== 204) throw new Error();
 
       setItems((prev) => prev.filter((item) => item.id !== id));
     } catch {
-      alert('Ошибка при удалении');
+      console.error('Ошибка при удалении образа');
     }
   };
 
@@ -149,7 +98,7 @@ const Outfits: React.FC = (): JSX.Element => {
                   <span
                     className="deleteIcon"
                     onClick={(e) => {
-                      e.stopPropagation(); // важно
+                      e.stopPropagation();
                       handleDelete(item.id);
                     }}
                   >

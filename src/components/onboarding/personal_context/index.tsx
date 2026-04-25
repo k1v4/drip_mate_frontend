@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 export interface PersonalInfoData {
   firstName: string;
   lastName: string;
   username: string;
-  city: string;
 }
 
 interface PersonalInfoStepProps {
@@ -13,6 +13,71 @@ interface PersonalInfoStepProps {
   onNext: (data: PersonalInfoData) => void;
   totalSteps: number;
   currentStep: number;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: 24,
+        left: 24,
+        zIndex: 999,
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        background: "#1e1018",
+        border: "1px solid #5a2020",
+        borderRadius: 10,
+        padding: "12px 16px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+        animation: "toastIn 0.2s ease",
+        maxWidth: 320,
+      }}
+    >
+      <style>{`
+        @keyframes toastIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      <span style={{ fontSize: 16 }}>⚠️</span>
+      <span style={{ fontSize: 13, color: "#e07070", lineHeight: 1.4 }}>{message}</span>
+      <button
+        type="button"
+        onClick={onClose}
+        style={{
+          marginLeft: "auto",
+          background: "none",
+          border: "none",
+          color: "#6b3030",
+          fontSize: 16,
+          cursor: "pointer",
+          lineHeight: 1,
+          padding: 0,
+          flexShrink: 0,
+        }}
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
+function useToast() {
+  const [message, setMessage] = useState<string | null>(null);
+
+  const showError = (msg: string) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(null), 4000);
+  };
+
+  const toast = message ? (
+    <Toast message={message} onClose={() => setMessage(null)} />
+  ) : null;
+
+  return { showError, toast };
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
@@ -84,15 +149,43 @@ export default function PersonalInfoStep({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
-  const [city, setCity] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const { showError, toast } = useToast();
+  const navigate = useNavigate();
+  
 
   const isValid =
     firstName.trim() !== "" &&
     lastName.trim() !== "" &&
-    username.trim() !== "" &&
-    city.trim() !== "";
+    username.trim() !== "";
 
   const progressPct = (currentStep / totalSteps) * 100;
+
+  const handleNext = async () => {
+    if (loading) return;
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:8080/api/v1/me/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: firstName,
+          surname: lastName,
+          username,
+        }),
+      });
+      if (!response.ok) throw new Error();
+      onNext({ firstName, lastName, username });
+      navigate('/')
+    } catch (e) {
+      console.error(e);
+      showError("Не удалось сохранить профиль. Попробуй ещё раз.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -239,12 +332,6 @@ export default function PersonalInfoStep({
             placeholder="ivan_ivanov"
             hint="Только латиница, цифры и _"
           />
-          <Field
-            label="Город проживания"
-            value={city}
-            onChange={setCity}
-            placeholder="Москва"
-          />
         </div>
 
         {/* Actions */}
@@ -282,8 +369,8 @@ export default function PersonalInfoStep({
           </button>
           <button
             type="button"
-            disabled={!isValid}
-            onClick={() => onNext({ firstName, lastName, username, city })}
+            disabled={!isValid || loading}
+            onClick={handleNext}
             style={{
               padding: "10px 28px",
               borderRadius: 8,
@@ -295,20 +382,24 @@ export default function PersonalInfoStep({
               fontSize: 14,
               fontFamily: "inherit",
               fontWeight: 600,
-              cursor: isValid ? "pointer" : "not-allowed",
+              cursor: isValid && !loading ? "pointer" : "not-allowed",
+              opacity: loading ? 0.6 : 1,
               transition: "opacity 0.18s, background 0.18s",
             }}
             onMouseEnter={(e) => {
-              if (isValid) e.currentTarget.style.opacity = "0.88";
+              if (isValid && !loading) e.currentTarget.style.opacity = "0.88";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.opacity = loading ? "0.6" : "1";
             }}
           >
-            Завершить →
+            {loading ? "Сохранение..." : "Завершить →"}
           </button>
         </div>
       </main>
+
+      {/* Toast */}
+      {toast}
     </div>
   );
 }

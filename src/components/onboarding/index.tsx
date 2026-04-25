@@ -25,12 +25,6 @@ export default function Onboarding() {
   };
 
   const handlePersonalNext = (personalData: PersonalInfoData) => {
-    const finalData: OnboardingData = { ...data, personal: personalData };
-    setData(finalData);
-
-    // TODO: отправить finalData на сервер
-    console.log("Onboarding complete:", finalData);
-
     navigate("/");
   };
 

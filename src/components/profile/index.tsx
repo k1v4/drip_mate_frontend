@@ -4,7 +4,7 @@ import './style.scss';
 import Personal from './personal';
 import Selection from './collection';
 import Outfits from './articles';
-import AddReleaseForm from './add_release';
+import AddItemForm from './add_release';
 import CatalogList from './catalog';
 
 const Profile = () => {
@@ -41,9 +41,9 @@ const Profile = () => {
       case 'myOutfits':
         return <Outfits />;
       case 'catalog':
-        return <CatalogList /> 
+        return accessId === 2 ? <CatalogList /> : null; 
       case 'add_item':
-        return accessId === 2 ? <AddReleaseForm /> : null; // Показываем только для access_id = 2
+        return accessId === 2 ? <AddItemForm /> : null; // Показываем только для access_id = 2
       default:
         return <div>Другой раздел</div>;
     }
@@ -88,12 +88,12 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Показываем "Добавить релиз" только для access_id = 2 */}
+            {/* Показываем "Каталог" только для access_id = 2 */}
             {accessId === 2 && (
               <div className='input-container'>
                 <input id='catalog' type='radio' name='radio' checked={selectedButton === 'catalog'} onChange={handleChange} />
                 <div className='radio-tile'>
-                  <label htmlFor='catalog'>Добавить предмет</label>
+                  <label htmlFor='catalog'>Каталог</label>
                 </div>
               </div>
             )}

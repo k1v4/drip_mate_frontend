@@ -1,6 +1,7 @@
 import { Button, TextField, Typography, Snackbar, Alert } from '@mui/material';
 import React, { JSX, useState } from 'react';
 import { IPropsLogin } from '../../../common/types/auth';
+import { instance } from '../../../utils/axios';
 
 const LoginPage: React.FC<IPropsLogin> = (props: IPropsLogin): JSX.Element => {
   const { setEmail, setPassword, navigate } = props;
@@ -12,6 +13,7 @@ const LoginPage: React.FC<IPropsLogin> = (props: IPropsLogin): JSX.Element => {
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
 
+  // ===== validation =====
   const validateFields = (): boolean => {
     let isValid = true;
 
@@ -35,15 +37,45 @@ const LoginPage: React.FC<IPropsLogin> = (props: IPropsLogin): JSX.Element => {
     return isValid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ===== submit =====
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateFields()) {
+    if (!validateFields()) {
+      setSnackbarMessage('Пожалуйста, исправьте ошибки в форме');
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      const response = await instance.post(
+        '/api/v1/login',
+        {
+          email: localEmail,
+          password: localPassword,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      const { access_level } = response.data;
+
+      localStorage.setItem('access_level', String(access_level));
+
       setEmail(localEmail);
       setPassword(localPassword);
-      console.log('Вход выполнен:', localEmail);
-    } else {
-      setSnackbarMessage('Пожалуйста, исправьте ошибки в форме');
+
+      console.log('Успешный логин');
+
+      navigate('/');
+    } catch (error: any) {
+      console.error('Ошибка логина:', error);
+
+      const message =
+        error.response?.data?.message || 'Ошибка авторизации';
+
+      setSnackbarMessage(message);
       setOpenSnackbar(true);
     }
   };
@@ -54,8 +86,13 @@ const LoginPage: React.FC<IPropsLogin> = (props: IPropsLogin): JSX.Element => {
 
   return (
     <>
-      <Typography variant="h6" fontFamily="Inter" textAlign="center" color="#ddd">
-        Войдите в аккаунт, чтобы получить возможность оценивать статьи и публиковать их!
+      <Typography
+        variant="h6"
+        fontFamily="Inter"
+        textAlign="center"
+        color="#ddd"
+      >
+        Войдите в аккаунт, чтобы получить возможность почувствовать свой стиль!
       </Typography>
 
       <TextField
@@ -101,7 +138,12 @@ const LoginPage: React.FC<IPropsLogin> = (props: IPropsLogin): JSX.Element => {
 
       <Typography
         variant="body1"
-        sx={{ fontFamily: 'Poppins', color: '#aaa', fontSize: '3vh', textAlign: 'center' }}
+        sx={{
+          fontFamily: 'Poppins',
+          color: '#aaa',
+          fontSize: '3vh',
+          textAlign: 'center',
+        }}
       >
         У вас нет аккаунта?
       </Typography>
@@ -124,8 +166,16 @@ const LoginPage: React.FC<IPropsLogin> = (props: IPropsLogin): JSX.Element => {
         Зарегистрироваться
       </Button>
 
-      <Snackbar open={openSnackbar} autoHideDuration={4000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>
