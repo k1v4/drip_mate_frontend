@@ -118,7 +118,7 @@ export default function PersonalInfoStep({ onBack, onNext, totalSteps, currentSt
     if (loading) return;
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8080/api/v1/me/profile", {
+      const response = await fetch("/api/v1/me/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

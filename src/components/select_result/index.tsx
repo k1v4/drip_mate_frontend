@@ -45,7 +45,7 @@ const SelectResult: React.FC = (): JSX.Element => {
       // Фолбэк: прямой переход по URL — грузим с бэка
       const fetchOutfit = async () => {
         try {
-          const response = await fetch(`http://localhost:8080/api/v1/users/outfit/${id}`, {
+          const response = await fetch(`/api/v1/users/outfit/${id}`, {
             credentials: 'include',
           });
           if (!response.ok) throw new Error();
@@ -83,7 +83,7 @@ const SelectResult: React.FC = (): JSX.Element => {
     if (saving) return;
     try {
       setSaving(true);
-      const response = await fetch('http://localhost:8080/api/v1/users/outfit', {
+      const response = await fetch('/api/v1/users/outfit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -103,7 +103,7 @@ const SelectResult: React.FC = (): JSX.Element => {
 
   const handleDeleteOutfit = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/users/outfit/${id}`, {
+      const response = await fetch(`/api/v1/users/outfit/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

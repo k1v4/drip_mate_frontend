@@ -36,7 +36,7 @@ const Personal: React.FC = (): JSX.Element => {
     if (!confirmed) return;
 
     try {
-      await axios.delete('http://localhost:8080/api/v1/users', {
+      await axios.delete('/api/v1/users', {
         withCredentials: true,
       });
 
@@ -69,7 +69,7 @@ const Personal: React.FC = (): JSX.Element => {
 
     try {
       const response = await axios.patch(
-        'http://localhost:8080/api/v1/me/profile',
+        '/api/v1/me/profile',
         {
           id: userId,
           name: profileData.name,
@@ -121,7 +121,7 @@ const Personal: React.FC = (): JSX.Element => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8080/api/v1/auth/change-password',
+        '/api/v1/auth/change-password',
         {
           curr_password: passwordData.currentPassword,
           new_password: passwordData.newPassword,

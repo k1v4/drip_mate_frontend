@@ -176,10 +176,10 @@ const AddItemForm: React.FC = () => {
     const load = async () => {
       try {
         const [catRes, seasonRes, styleRes, colorRes] = await Promise.all([
-          fetch('http://localhost:8080/api/v1/reference/categories', { credentials: 'include' }),
-          fetch('http://localhost:8080/api/v1/reference/seasons',    { credentials: 'include' }),
-          fetch('http://localhost:8080/api/v1/reference/styles',     { credentials: 'include' }),
-          fetch('http://localhost:8080/api/v1/reference/colors',     { credentials: 'include' }),
+          fetch('/api/v1/reference/categories', { credentials: 'include' }),
+          fetch('/api/v1/reference/seasons',    { credentials: 'include' }),
+          fetch('/api/v1/reference/styles',     { credentials: 'include' }),
+          fetch('/api/v1/reference/colors',     { credentials: 'include' }),
         ]);
         setCategories(await catRes.json());
         setSeasons(await seasonRes.json());
@@ -237,7 +237,7 @@ const AddItemForm: React.FC = () => {
       colorIds.forEach((id) => formData.append('color_ids', String(id)));
 
       // Content-Type НЕ выставляем вручную — браузер сам добавит boundary
-      const response = await fetch('http://localhost:8080/api/v1/catalog', {
+      const response = await fetch('/api/v1/catalog', {
         method: 'POST',
         credentials: 'include',
         body: formData,

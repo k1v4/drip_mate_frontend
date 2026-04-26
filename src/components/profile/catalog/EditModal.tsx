@@ -136,9 +136,9 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
     const fetchDicts = async () => {
       try {
         const [stylesRes, colorsRes, seasonsRes] = await Promise.all([
-          fetch("http://localhost:8080/api/v1/reference/styles",  { credentials: "include" }),
-          fetch("http://localhost:8080/api/v1/reference/colors",  { credentials: "include" }),
-          fetch("http://localhost:8080/api/v1/reference/seasons", { credentials: "include" }),
+          fetch("/api/v1/reference/styles",  { credentials: "include" }),
+          fetch("/api/v1/reference/colors",  { credentials: "include" }),
+          fetch("/api/v1/reference/seasons", { credentials: "include" }),
         ]);
 
         const styles  = await stylesRes.json();
@@ -177,7 +177,7 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
     if (loading) return;
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/v1/catalog/${draft.id}`, {
+      const response = await fetch(`/api/v1/catalog/${draft.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

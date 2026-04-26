@@ -110,9 +110,9 @@ export default function StyleStep({
     const fetchData = async () => {
       try {
         const [stylesRes, colorsRes, musicRes] = await Promise.all([
-          fetch("http://localhost:8080/api/v1/reference/styles"),
-          fetch("http://localhost:8080/api/v1/reference/colors"),
-          fetch("http://localhost:8080/api/v1/reference/musics"),
+          fetch("/api/v1/reference/styles"),
+          fetch("/api/v1/reference/colors"),
+          fetch("/api/v1/reference/musics"),
         ]);
         setStylesList(await stylesRes.json());
         setColorsList(await colorsRes.json());
@@ -133,7 +133,7 @@ export default function StyleStep({
     }
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8080/api/v1/me/context", {
+      const response = await fetch("/api/v1/me/context", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

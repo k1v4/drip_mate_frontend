@@ -29,7 +29,7 @@ const Outfits: React.FC = (): JSX.Element => {
 
   const fetchOutfits = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/users/outfit', {
+      const response = await fetch('/api/v1/users/outfit', {
         method: 'GET',
         credentials: 'include',
       });
@@ -55,7 +55,7 @@ const Outfits: React.FC = (): JSX.Element => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/users/outfit/${id}`, {
+      const response = await fetch(`/api/v1/users/outfit/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

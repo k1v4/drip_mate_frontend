@@ -150,7 +150,7 @@ export default function CatalogList() {
     setLoadingPage(true);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/v1/catalog/all?page=${p}&limit=${PAGE_SIZE}`,
+        `/api/v1/catalog/all?page=${p}&limit=${PAGE_SIZE}`,
         { credentials: "include" }
       );
       if (!res.ok) throw new Error();
@@ -195,7 +195,7 @@ export default function CatalogList() {
   // ── Delete ──────────────────────────────────────────────────────────────
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/catalog/${id}`, {
+      const res = await fetch(`/api/v1/catalog/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
