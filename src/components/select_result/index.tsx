@@ -26,10 +26,10 @@ const SelectResult: React.FC = (): JSX.Element => {
   const location = useLocation();
 
   const isDetailMode = Boolean(id);
+  const logId: number | undefined = location.state?.logId;
 
   useEffect(() => {
     if (isDetailMode) {
-      // Если items уже переданы из Outfits — используем их, запрос не делаем
       const stateItems = location.state?.items;
       if (stateItems?.length) {
         setItems(stateItems.map((item: any) => ({
@@ -42,7 +42,6 @@ const SelectResult: React.FC = (): JSX.Element => {
         return;
       }
 
-      // Фолбэк: прямой переход по URL — грузим с бэка
       const fetchOutfit = async () => {
         try {
           const response = await fetch(`/api/v1/users/outfit/${id}`, {
@@ -65,8 +64,8 @@ const SelectResult: React.FC = (): JSX.Element => {
       };
       fetchOutfit();
     } else {
-      // Режим рекомендации — данные из location.state
-      const catalogItems: CatalogItem[] = location.state ?? [];
+      // Режим рекомендации — catalog лежит в location.state.items
+      const catalogItems: CatalogItem[] = location.state?.items ?? [];
       setItems(
         catalogItems.map((item) => ({
           id:       item.id,
@@ -90,6 +89,7 @@ const SelectResult: React.FC = (): JSX.Element => {
         body: JSON.stringify({
           name: `Образ от ${new Date().toLocaleDateString('ru-RU')}`,
           catalog_item_ids: items.map((item) => item.id),
+          ...(logId !== undefined && { log_id: logId }),
         }),
       });
       if (!response.ok) throw new Error();

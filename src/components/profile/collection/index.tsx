@@ -1,17 +1,6 @@
-import { Add } from '@mui/icons-material';
 import { Button, Slider, Typography } from '@mui/material';
-import React, { JSX, useEffect, useState } from 'react';
-import AddShoeForm from './add';
-import { instance } from '../../../utils/axios';
-import { useAuth } from '../../../context/AuthContext';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { JSX, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface Item {
-  id: number;
-  name: string;
-  url: string;
-}
 
 const Selection: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -33,9 +22,9 @@ const Selection: React.FC = (): JSX.Element => {
 
       if (!response.ok) throw new Error();
 
-      const outfitItems = await response.json();
+      const { catalog, log_id } = await response.json();
 
-      navigate('/outfit', { state: outfitItems });
+      navigate('/outfit', { state: { items: catalog, logId: log_id } });
     } catch (e) {
       console.error('Ошибка формирования образа:', e);
     } finally {
