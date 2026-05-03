@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { instance } from '../../../utils/axios';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 export interface PersonalInfoData {
@@ -115,24 +116,20 @@ export default function PersonalInfoStep({ onBack, onNext, totalSteps, currentSt
   const progressPct = (currentStep / totalSteps) * 100;
 
   const handleNext = async () => {
-    if (loading) return;
-    try {
-      setLoading(true);
-      const response = await fetch("/api/v1/me/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name: firstName, surname: lastName, username, gender }),
-      });
-      if (!response.ok) throw new Error();
-      onNext({ firstName, lastName, username, gender });
-      navigate('/');
-    } catch (e) {
-      console.error(e);
-      showError("Не удалось сохранить профиль. Попробуй ещё раз.");
-    } finally {
-      setLoading(false);
-    }
+      if (loading) return;
+      try {
+          setLoading(true);
+          await instance.patch('/api/v1/me/profile', {
+              name: firstName, surname: lastName, username, gender
+          });
+          onNext({ firstName, lastName, username, gender });
+          navigate('/');
+      } catch (e) {
+          console.error(e);
+          showError('Не удалось сохранить профиль. Попробуй ещё раз.');
+      } finally {
+          setLoading(false);
+      }
   };
 
   return (

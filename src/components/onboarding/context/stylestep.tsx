@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { instance } from '../../../utils/axios';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface DictItem {
@@ -107,46 +108,45 @@ export default function StyleStep({
 
   // ── Load dictionaries ──
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [stylesRes, colorsRes, musicRes] = await Promise.all([
-          fetch("/api/v1/reference/styles"),
-          fetch("/api/v1/reference/colors"),
-          fetch("/api/v1/reference/musics"),
-        ]);
-        setStylesList(await stylesRes.json());
-        setColorsList(await colorsRes.json());
-        setMusicList(await musicRes.json());
-      } catch (e) {
-        console.error("Ошибка загрузки справочников", e);
-      }
-    };
-    fetchData();
+      const fetchData = async () => {
+          try {
+              const [stylesRes, colorsRes, musicRes] = await Promise.all([
+                  instance.get("/api/v1/reference/styles"),
+                  instance.get("/api/v1/reference/colors"),
+                  instance.get("/api/v1/reference/musics"),
+              ]);
+              setStylesList(stylesRes.data);
+              setColorsList(colorsRes.data);
+              setMusicList(musicRes.data);
+          } catch (e) {
+              console.error("Ошибка загрузки справочников", e);
+          }
+      };
+      fetchData();
   }, []);
 
   // ── Submit ──
   const handleNext = async () => {
-    if (loading) return;
-    if (!selectedStyles.length || !selectedMusic.length || !selectedColors.length || !city.trim()) {
-      alert("Выберите хотя бы один вариант в каждом блоке и укажите город");
-      return;
-    }
-    try {
-      setLoading(true);
-      const response = await fetch("/api/v1/me/context", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ city, styles: selectedStyles, music: selectedMusic, colors: selectedColors }),
-      });
-      if (!response.ok) throw new Error();
-      onNext?.({ styles: selectedStyles, music: selectedMusic, colors: selectedColors, city, maxPrice });
-    } catch (e) {
-      console.error(e);
-      alert("Ошибка при сохранении");
-    } finally {
-      setLoading(false);
-    }
+      if (loading) return;
+      if (!selectedStyles.length || !selectedMusic.length || !selectedColors.length || !city.trim()) {
+          alert("Выберите хотя бы один вариант в каждом блоке и укажите город");
+          return;
+      }
+      try {
+          setLoading(true);
+          await instance.patch("/api/v1/me/context", {
+              city,
+              styles: selectedStyles,
+              music: selectedMusic,
+              colors: selectedColors,
+          });
+          onNext?.({ styles: selectedStyles, music: selectedMusic, colors: selectedColors, city, maxPrice });
+      } catch (e) {
+          console.error(e);
+          alert("Ошибка при сохранении");
+      } finally {
+          setLoading(false);
+      }
   };
 
   const progressPct = (currentStep / totalSteps) * 100;

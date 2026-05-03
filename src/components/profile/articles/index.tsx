@@ -3,6 +3,7 @@ import React, { JSX, useEffect, useState } from 'react';
 import FashionWeekForm from './add';
 import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { instance } from '../../../utils/axios';
 
 interface OutfitItem {
   id: string;
@@ -28,21 +29,14 @@ const Outfits: React.FC = (): JSX.Element => {
   const itemsPerPage = 6;
 
   const fetchOutfits = async () => {
-    try {
-      const response = await fetch('/api/v1/users/outfit', {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (!response.ok) throw new Error();
-
-      const data: Outfit[] = await response.json();
-      setOutfits(data);
-    } catch (error) {
-      console.error('Ошибка при загрузке образов:', error);
-    } finally {
-      setLoading(false);
-    }
+      try {
+          const response = await instance.get('/api/v1/users/outfit');
+          setOutfits(response.data);
+      } catch (error) {
+          console.error('Ошибка при загрузке образов:', error);
+      } finally {
+          setLoading(false);
+      }
   };
 
   useEffect(() => {
@@ -54,18 +48,12 @@ const Outfits: React.FC = (): JSX.Element => {
   };
 
   const handleDelete = async (id: string) => {
-    try {
-      const response = await fetch(`/api/v1/users/outfit/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      if (response.status !== 204) throw new Error();
-
-      setOutfits((prev) => prev.filter((o) => o.id !== id));
-    } catch {
-      console.error('Ошибка при удалении образа');
-    }
+      try {
+          await instance.delete(`/api/v1/users/outfit/${id}`);
+          setOutfits((prev) => prev.filter((o) => o.id !== id));
+      } catch {
+          console.error('Ошибка при удалении образа');
+      }
   };
 
   const handleClick = (outfit: Outfit) => {

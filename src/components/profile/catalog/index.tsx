@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import EditModal from "./EditModal";
 import { CatalogItem } from "./types";
+import { instance } from '../../../utils/axios';
 
-// ── Constants ──────────────────────────────────────────────────────────────
 const PAGE_SIZE = 20;
 
 const SEASON_COLORS: Record<string, { bg: string; color: string }> = {
@@ -19,7 +19,6 @@ const GENDER_ICONS: Record<string, string> = {
   "Унисекс": "⚥",
 };
 
-// ── Sub-components ─────────────────────────────────────────────────────────
 function Badge({ children, bg, color }: { children: React.ReactNode; bg: string; color: string }) {
   return (
     <span style={{ background: bg, color, fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 20, whiteSpace: "nowrap", letterSpacing: "0.03em" }}>
@@ -47,7 +46,6 @@ function FilterInput({ value, onChange, placeholder }: { value: string; onChange
         transition: "border-color 0.18s",
       }}
     >
-      {/* options передаются снаружи через children */}
       <option value="">{placeholder}</option>
     </select>
   );
@@ -132,32 +130,22 @@ function DeleteConfirm({ itemName, onConfirm, onCancel }: { itemName: string; on
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────────────────
 export default function CatalogList() {
-  const [items, setItems]               = useState<CatalogItem[]>([]);
-  const [total, setTotal]               = useState(0);
-  const [page, setPage]                 = useState(1);
-  const [loadingPage, setLoadingPage]   = useState(false);
-
-  const [search, setSearch]             = useState("");
+  const [items, setItems]                 = useState<CatalogItem[]>([]);
+  const [total, setTotal]                 = useState(0);
+  const [page, setPage]                   = useState(1);
+  const [loadingPage, setLoadingPage]     = useState(false);
+  const [search, setSearch]               = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [editingItem, setEditingItem]     = useState<CatalogItem | null>(null);
+  const [deletingItem, setDeletingItem]   = useState<CatalogItem | null>(null);
 
-  const [editingItem, setEditingItem]   = useState<CatalogItem | null>(null);
-  const [deletingItem, setDeletingItem] = useState<CatalogItem | null>(null);
-
-  // ── Fetch страницы ──────────────────────────────────────────────────────
   const fetchPage = useCallback(async (p: number) => {
     setLoadingPage(true);
     try {
-      const res = await fetch(
-        `/api/v1/catalog/all?page=${p}&limit=${PAGE_SIZE}`,
-        { credentials: "include" }
-      );
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+      const response = await instance.get(`/api/v1/catalog/all?page=${p}&limit=${PAGE_SIZE}`);
+      const data = response.data;
 
-      // Ожидаем: { items: CatalogItem[], total: number }
-      // Если бэк отдаёт просто массив — замени на: setItems(data); setTotal(data.length)
       const mapped: CatalogItem[] = data.items.map((i: any) => ({
         id:       i.id,
         name:     i.name,
@@ -178,28 +166,20 @@ export default function CatalogList() {
 
   useEffect(() => { fetchPage(page); }, [page, fetchPage]);
 
-  // ── Локальный поиск по текущей странице ────────────────────────────────
-  // Если хочешь серверный поиск — добавь search в fetchPage и в URL (?search=...)
   const filtered = useMemo(() => {
     if (!search) return items;
     const q = search.toLowerCase();
     return items.filter((i) => i.name.toLowerCase().includes(q));
   }, [items, search]);
 
-  // ── Save (EditModal) ────────────────────────────────────────────────────
   const handleSave = (updated: CatalogItem) => {
     setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
     setEditingItem(null);
   };
 
-  // ── Delete ──────────────────────────────────────────────────────────────
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/v1/catalog/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (res.status !== 204) throw new Error();
+      await instance.delete(`/api/v1/catalog/${id}`);
       setItems((prev) => prev.filter((i) => i.id !== id));
       setTotal((prev) => prev - 1);
     } catch (e) {

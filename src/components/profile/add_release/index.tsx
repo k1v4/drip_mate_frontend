@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import { instance } from '../../../utils/axios';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface DictItem {
@@ -176,15 +177,15 @@ const AddItemForm: React.FC = () => {
     const load = async () => {
       try {
         const [catRes, seasonRes, styleRes, colorRes] = await Promise.all([
-          fetch('/api/v1/reference/categories', { credentials: 'include' }),
-          fetch('/api/v1/reference/seasons',    { credentials: 'include' }),
-          fetch('/api/v1/reference/styles',     { credentials: 'include' }),
-          fetch('/api/v1/reference/colors',     { credentials: 'include' }),
+            instance.get('/api/v1/reference/categories'),
+            instance.get('/api/v1/reference/seasons'),
+            instance.get('/api/v1/reference/styles'),
+            instance.get('/api/v1/reference/colors'),
         ]);
-        setCategories(await catRes.json());
-        setSeasons(await seasonRes.json());
-        setStyles(await styleRes.json());
-        setColors(await colorRes.json());
+        setCategories(catRes.data);
+        setSeasons(seasonRes.data);
+        setStyles(styleRes.data);
+        setColors(colorRes.data);
       } catch (e) {
         console.error('Ошибка загрузки справочников', e);
       }
@@ -237,11 +238,7 @@ const AddItemForm: React.FC = () => {
       colorIds.forEach((id) => formData.append('color_ids', String(id)));
 
       // Content-Type НЕ выставляем вручную — браузер сам добавит boundary
-      const response = await fetch('/api/v1/catalog', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
+      const response = await instance.post('/api/v1/catalog', formData);
 
       if (response.status !== 201) throw new Error();
 

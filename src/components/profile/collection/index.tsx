@@ -1,6 +1,7 @@
 import { Button, Slider, Typography } from '@mui/material';
 import React, { JSX, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { instance } from '../../../utils/axios';
 
 const Selection: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -9,27 +10,17 @@ const Selection: React.FC = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmitRating = async () => {
-    if (loading) return;
-    try {
-      setLoading(true);
-
-      const response = await fetch('/api/v1/recommendation', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ formality: rating }),
-      });
-
-      if (!response.ok) throw new Error();
-
-      const { catalog, log_id } = await response.json();
-
-      navigate('/outfit', { state: { items: catalog, logId: log_id } });
-    } catch (e) {
-      console.error('Ошибка формирования образа:', e);
-    } finally {
-      setLoading(false);
-    }
+      if (loading) return;
+      try {
+          setLoading(true);
+          const response = await instance.put('/api/v1/recommendation', { formality: rating });
+          const { catalog, log_id } = response.data;
+          navigate('/outfit', { state: { items: catalog, logId: log_id } });
+      } catch (e) {
+          console.error('Ошибка формирования образа:', e);
+      } finally {
+          setLoading(false);
+      }
   };
 
   const handleRatingChange = (_: Event, value: number | number[]) => {

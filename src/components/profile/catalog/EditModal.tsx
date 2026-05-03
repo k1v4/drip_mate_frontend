@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { CatalogItem, UpdateCatalogRequest } from "./types";
+import { instance } from '../../../utils/axios'; // поправь путь
 
 interface DictItem {
   id: number;
@@ -13,12 +14,10 @@ interface EditModalProps {
   onClose: () => void;
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 function toggle<T>(arr: T[], item: T): T[] {
   return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 }
 
-// ── UI primitives (те же что в AddItemForm) ────────────────────────────────
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <p style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6b6b80", marginBottom: 6, fontWeight: 600 }}>
@@ -114,7 +113,6 @@ function ColorSwatch({ hex, name, active, onClick }: { hex: string; name: string
   );
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
 export default function EditModal({ item, onSave, onClose }: EditModalProps) {
   const [stylesList,  setStylesList]  = useState<DictItem[]>([]);
   const [colorsList,  setColorsList]  = useState<DictItem[]>([]);
@@ -136,18 +134,14 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
     const fetchDicts = async () => {
       try {
         const [stylesRes, colorsRes, seasonsRes] = await Promise.all([
-          fetch("/api/v1/reference/styles",  { credentials: "include" }),
-          fetch("/api/v1/reference/colors",  { credentials: "include" }),
-          fetch("/api/v1/reference/seasons", { credentials: "include" }),
+          instance.get('/api/v1/reference/styles'),
+          instance.get('/api/v1/reference/colors'),
+          instance.get('/api/v1/reference/seasons'),
         ]);
 
-        const styles  = await stylesRes.json();
-        const colors  = await colorsRes.json();
-        const seasons = await seasonsRes.json();
-
-        const safeStyles  = Array.isArray(styles)  ? styles  : [];
-        const safeColors  = Array.isArray(colors)  ? colors  : [];
-        const safeSeasons = Array.isArray(seasons) ? seasons : [];
+        const safeStyles  = Array.isArray(stylesRes.data)  ? stylesRes.data  : [];
+        const safeColors  = Array.isArray(colorsRes.data)  ? colorsRes.data  : [];
+        const safeSeasons = Array.isArray(seasonsRes.data) ? seasonsRes.data : [];
 
         setStylesList(safeStyles);
         setColorsList(safeColors);
@@ -172,18 +166,12 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // ── Update API (без изменений) ──
+  // ── Update ──
   const handleUpdate = async () => {
     if (loading) return;
     try {
       setLoading(true);
-      const response = await fetch(`/api/v1/catalog/${draft.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(draft),
-      });
-      if (!response.ok) throw new Error();
+      await instance.put(`/api/v1/catalog/${draft.id}`, draft);
 
       const updatedItem: CatalogItem = {
         id:       draft.id,
@@ -235,13 +223,11 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* Название */}
           <div>
             <Label>Название</Label>
             <TextInput value={draft.name} onChange={(v) => setDraft((p) => ({ ...p, name: v }))} />
           </div>
 
-          {/* Сезон */}
           <div>
             <Label>Сезон</Label>
             <StyledSelect
@@ -252,14 +238,11 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
             />
           </div>
 
-          {/* Стили — чипы */}
           <div>
             <Label>Стили</Label>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {stylesList.map((s) => (
-                <Chip
-                  key={s.id}
-                  label={s.name}
+                <Chip key={s.id} label={s.name}
                   active={(draft.style_ids ?? []).includes(s.id)}
                   onClick={() => setDraft((p) => ({ ...p, style_ids: toggle(p.style_ids ?? [], s.id) }))}
                 />
@@ -267,15 +250,11 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
             </div>
           </div>
 
-          {/* Цвета — свотчи */}
           <div>
             <Label>Цвета</Label>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {colorsList.map((c) => (
-                <ColorSwatch
-                  key={c.id}
-                  hex={c.hex ?? "#ccc"}
-                  name={c.name}
+                <ColorSwatch key={c.id} hex={c.hex ?? "#ccc"} name={c.name}
                   active={(draft.color_ids ?? []).includes(c.id)}
                   onClick={() => setDraft((p) => ({ ...p, color_ids: toggle(p.color_ids ?? [], c.id) }))}
                 />
@@ -283,7 +262,6 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
             </div>
           </div>
 
-          {/* URL фото */}
           <div>
             <Label>URL фото</Label>
             <TextInput value={draft.image_url ?? ""} onChange={(v) => setDraft((p) => ({ ...p, image_url: v }))} />

@@ -1,6 +1,7 @@
 import React, { JSX, useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import './style.scss';
+import { instance } from '../../utils/axios';
 
 type OutfitItem = {
   id: string;
@@ -43,24 +44,18 @@ const SelectResult: React.FC = (): JSX.Element => {
       }
 
       const fetchOutfit = async () => {
-        try {
-          const response = await fetch(`/api/v1/users/outfit/${id}`, {
-            credentials: 'include',
-          });
-          if (!response.ok) throw new Error();
-          const data = await response.json();
-          setItems(
-            (data.items ?? []).map((item: any) => ({
-              id:       item.id,
-              name:     item.name,
-              category: item.material ?? '',
-              season:   '',
-              imageUrl: item.image,
-            }))
-          );
-        } catch (e) {
-          console.error('Ошибка загрузки образа:', e);
-        }
+          try {
+              const response = await instance.get(`/api/v1/users/outfit/${id}`);
+              setItems((response.data.items ?? []).map((item: any) => ({
+                  id:       item.id,
+                  name:     item.name,
+                  category: item.material ?? '',
+                  season:   '',
+                  imageUrl: item.image,
+              })));
+          } catch (e) {
+              console.error('Ошибка загрузки образа:', e);
+          }
       };
       fetchOutfit();
     } else {
@@ -78,40 +73,30 @@ const SelectResult: React.FC = (): JSX.Element => {
     }
   }, [id, isDetailMode, location.state]);
 
-  const handleSaveOutfit = async () => {
-    if (saving) return;
-    try {
-      setSaving(true);
-      const response = await fetch('/api/v1/users/outfit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: `Образ от ${new Date().toLocaleDateString('ru-RU')}`,
-          catalog_item_ids: items.map((item) => item.id),
-          ...(logId !== undefined && { log_id: logId }),
-        }),
-      });
-      if (!response.ok) throw new Error();
-      navigate('/');
-    } catch (e) {
-      console.error('Ошибка сохранения образа:', e);
-    } finally {
-      setSaving(false);
-    }
-  };
+    const handleSaveOutfit = async () => {
+        if (saving) return;
+        try {
+            setSaving(true);
+            await instance.post('/api/v1/users/outfit', {
+                name: `Образ от ${new Date().toLocaleDateString('ru-RU')}`,
+                catalog_item_ids: items.map((item) => item.id),
+                ...(logId !== undefined && { log_id: logId }),
+            });
+            navigate('/');
+        } catch (e) {
+            console.error('Ошибка сохранения образа:', e);
+        } finally {
+            setSaving(false);
+        }
+    };
 
   const handleDeleteOutfit = async () => {
-    try {
-      const response = await fetch(`/api/v1/users/outfit/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (response.status !== 204) throw new Error();
-      navigate('/');
-    } catch (e) {
-      console.error('Ошибка удаления образа:', e);
-    }
+      try {
+          await instance.delete(`/api/v1/users/outfit/${id}`);
+          navigate('/');
+      } catch (e) {
+          console.error('Ошибка удаления образа:', e);
+      }
   };
 
   return (
