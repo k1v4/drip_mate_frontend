@@ -134,7 +134,7 @@ export default function StyleStep({
       }
       try {
           setLoading(true);
-          await instance.patch("/api/v1/users/context", {
+          await instance.patch("/api/v1/users/me/context", {
               city,
               styles: selectedStyles,
               music: selectedMusic,

@@ -161,8 +161,8 @@ const AddItemForm: React.FC = () => {
   const [title,       setTitle]       = useState('');
   const [photo,       setPhoto]       = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [categoryId,  setCategoryId]  = useState('');
-  const [seasonId,    setSeasonId]    = useState('');
+  const [categoryId, setCategoryId] = useState<number | ''>('');
+  const [seasonId,   setSeasonId]   = useState<number | ''>('');
   const [gender,      setGender]      = useState('');
   const [material,    setMaterial]    = useState('');
   const [formality,   setFormality]   = useState('');
@@ -228,8 +228,8 @@ const AddItemForm: React.FC = () => {
       const formData = new FormData();
       formData.append('image',           photo);
       formData.append('name',            title);
-      formData.append('category_id',     categoryId);
-      formData.append('season_id',       seasonId);
+      formData.append('category_id', String(Number(categoryId)));
+      formData.append('season_id',   String(Number(seasonId)));
       formData.append('gender',          gender);
       formData.append('material',        material);
       formData.append('formality_level', formality);
@@ -238,7 +238,7 @@ const AddItemForm: React.FC = () => {
       colorIds.forEach((id) => formData.append('color_ids', String(id)));
 
       // Content-Type НЕ выставляем вручную — браузер сам добавит boundary
-      const response = await instance.post('/api/v1/catalogsss', formData);
+      const response = await instance.post('/api/v1/catalogs', formData);
 
       if (response.status !== 201) throw new Error();
 
@@ -304,11 +304,11 @@ const AddItemForm: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
               <SectionLabel>Категория</SectionLabel>
-              <StyledSelect value={categoryId} onChange={setCategoryId} options={categories} placeholder="Выбери категорию" />
+              <StyledSelect value={categoryId === '' ? '' : String(categoryId)} onChange={(v) => setCategoryId(Number(v))} options={categories} placeholder="Выбери категорию" />
             </div>
             <div>
               <SectionLabel>Сезон</SectionLabel>
-              <StyledSelect value={seasonId} onChange={setSeasonId} options={seasons} placeholder="Выбери сезон" />
+              <StyledSelect value={seasonId === '' ? '' : String(seasonId)} onChange={(v) => setSeasonId(Number(v))} options={seasons} placeholder="Выбери сезон" />
             </div>
           </div>
 
