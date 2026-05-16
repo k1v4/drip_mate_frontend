@@ -111,9 +111,9 @@ export default function StyleStep({
       const fetchData = async () => {
           try {
               const [stylesRes, colorsRes, musicRes] = await Promise.all([
-                  instance.get("/api/v1/reference/styles"),
-                  instance.get("/api/v1/reference/colors"),
-                  instance.get("/api/v1/reference/musics"),
+                  instance.get("/api/v1/references/styles"),
+                  instance.get("/api/v1/references/colors"),
+                  instance.get("/api/v1/references/musics"),
               ]);
               setStylesList(stylesRes.data);
               setColorsList(colorsRes.data);
@@ -134,7 +134,7 @@ export default function StyleStep({
       }
       try {
           setLoading(true);
-          await instance.patch("/api/v1/me/context", {
+          await instance.patch("/api/v1/users/context", {
               city,
               styles: selectedStyles,
               music: selectedMusic,

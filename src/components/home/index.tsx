@@ -4,8 +4,6 @@ import { IconButton, Button } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import './style.scss';
 import Add from '@mui/icons-material/Add';
-import { Box } from '@mui/material';
-import GetArticlePage from './article';
 
 const MainHome = () => {
     const location = useLocation();

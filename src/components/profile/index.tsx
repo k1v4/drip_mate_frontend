@@ -4,7 +4,7 @@ import './style.scss';
 import Personal from './personal';
 import Selection from './collection';
 import Outfits from './articles';
-import AddItemForm from './add_release';
+import AddItemForm from './add_item';
 import CatalogList from './catalog';
 import { useAccessLevel } from '../../utils/hook';
 

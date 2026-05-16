@@ -119,7 +119,7 @@ export default function PersonalInfoStep({ onBack, onNext, totalSteps, currentSt
       if (loading) return;
       try {
           setLoading(true);
-          await instance.patch('/api/v1/me/profile', {
+          await instance.patch('/api/v1/users/profile', {
               name: firstName, surname: lastName, username, gender
           });
           onNext({ firstName, lastName, username, gender });

@@ -134,9 +134,9 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
     const fetchDicts = async () => {
       try {
         const [stylesRes, colorsRes, seasonsRes] = await Promise.all([
-          instance.get('/api/v1/reference/styles'),
-          instance.get('/api/v1/reference/colors'),
-          instance.get('/api/v1/reference/seasons'),
+          instance.get('/api/v1/references/styles'),
+          instance.get('/api/v1/references/colors'),
+          instance.get('/api/v1/references/seasons'),
         ]);
 
         const safeStyles  = Array.isArray(stylesRes.data)  ? stylesRes.data  : [];
@@ -171,7 +171,7 @@ export default function EditModal({ item, onSave, onClose }: EditModalProps) {
     if (loading) return;
     try {
       setLoading(true);
-      await instance.put(`/api/v1/catalog/${draft.id}`, draft);
+      await instance.put(`/api/v1/catalogs/${draft.id}`, draft);
 
       const updatedItem: CatalogItem = {
         id:       draft.id,

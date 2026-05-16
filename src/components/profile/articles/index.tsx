@@ -30,7 +30,7 @@ const Outfits: React.FC = (): JSX.Element => {
 
   const fetchOutfits = async () => {
       try {
-          const response = await instance.get('/api/v1/users/outfit');
+          const response = await instance.get('/api/v1/users/outfits');
           setOutfits(response.data);
       } catch (error) {
           console.error('Ошибка при загрузке образов:', error);
@@ -49,7 +49,7 @@ const Outfits: React.FC = (): JSX.Element => {
 
   const handleDelete = async (id: string) => {
       try {
-          await instance.delete(`/api/v1/users/outfit/${id}`);
+          await instance.delete(`/api/v1/users/outfits/${id}`);
           setOutfits((prev) => prev.filter((o) => o.id !== id));
       } catch {
           console.error('Ошибка при удалении образа');

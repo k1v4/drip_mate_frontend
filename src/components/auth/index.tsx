@@ -25,7 +25,7 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
         if (location.pathname === '/login') {
             try {
                 const response = await instance.post(
-                    '/api/v1/login',
+                    '/api/v1/auth/login',
                     { email, password },
                     { withCredentials: true }  // кук прилетит автоматически
                 );
@@ -44,7 +44,7 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                 }
 
                 const response = await instance.post(
-                    '/api/v1/register',
+                    '/api/v1/users/register',
                     { email, userName, password },
                     { withCredentials: true }
                 );

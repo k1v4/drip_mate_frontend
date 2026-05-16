@@ -13,7 +13,7 @@ const Selection: React.FC = (): JSX.Element => {
       if (loading) return;
       try {
           setLoading(true);
-          const response = await instance.put('/api/v1/recommendation', { formality: rating });
+          const response = await instance.post('/api/v1/recommendation', { formality: rating });
           const { catalog, log_id } = response.data;
           navigate('/outfit', { state: { items: catalog, logId: log_id } });
       } catch (e) {

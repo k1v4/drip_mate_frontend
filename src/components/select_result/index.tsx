@@ -45,7 +45,7 @@ const SelectResult: React.FC = (): JSX.Element => {
 
       const fetchOutfit = async () => {
           try {
-              const response = await instance.get(`/api/v1/users/outfit/${id}`);
+              const response = await instance.get(`/api/v1/users/outfits/${id}`);
               setItems((response.data.items ?? []).map((item: any) => ({
                   id:       item.id,
                   name:     item.name,
@@ -77,7 +77,7 @@ const SelectResult: React.FC = (): JSX.Element => {
         if (saving) return;
         try {
             setSaving(true);
-            await instance.post('/api/v1/users/outfit', {
+            await instance.post('/api/v1/users/outfits', {
                 name: `Образ от ${new Date().toLocaleDateString('ru-RU')}`,
                 catalog_item_ids: items.map((item) => item.id),
                 ...(logId !== undefined && { log_id: logId }),
@@ -92,7 +92,7 @@ const SelectResult: React.FC = (): JSX.Element => {
 
   const handleDeleteOutfit = async () => {
       try {
-          await instance.delete(`/api/v1/users/outfit/${id}`);
+          await instance.delete(`/api/v1/users/outfits/${id}`);
           navigate('/');
       } catch (e) {
           console.error('Ошибка удаления образа:', e);

@@ -143,7 +143,7 @@ export default function CatalogList() {
   const fetchPage = useCallback(async (p: number) => {
     setLoadingPage(true);
     try {
-      const response = await instance.get(`/api/v1/catalog/all?page=${p}&limit=${PAGE_SIZE}`);
+      const response = await instance.get(`/api/v1/catalogs?page=${p}&limit=${PAGE_SIZE}`);
       const data = response.data;
 
       const mapped: CatalogItem[] = data.items.map((i: any) => ({
@@ -179,7 +179,7 @@ export default function CatalogList() {
 
   const handleDelete = async (id: string) => {
     try {
-      await instance.delete(`/api/v1/catalog/${id}`);
+      await instance.delete(`/api/v1/catalogs/${id}`);
       setItems((prev) => prev.filter((i) => i.id !== id));
       setTotal((prev) => prev - 1);
     } catch (e) {

@@ -177,10 +177,10 @@ const AddItemForm: React.FC = () => {
     const load = async () => {
       try {
         const [catRes, seasonRes, styleRes, colorRes] = await Promise.all([
-            instance.get('/api/v1/reference/categories'),
-            instance.get('/api/v1/reference/seasons'),
-            instance.get('/api/v1/reference/styles'),
-            instance.get('/api/v1/reference/colors'),
+            instance.get('/api/v1/references/categories'),
+            instance.get('/api/v1/references/seasons'),
+            instance.get('/api/v1/references/styles'),
+            instance.get('/api/v1/references/colors'),
         ]);
         setCategories(catRes.data);
         setSeasons(seasonRes.data);
@@ -238,7 +238,7 @@ const AddItemForm: React.FC = () => {
       colorIds.forEach((id) => formData.append('color_ids', String(id)));
 
       // Content-Type НЕ выставляем вручную — браузер сам добавит boundary
-      const response = await instance.post('/api/v1/catalog', formData);
+      const response = await instance.post('/api/v1/catalogsss', formData);
 
       if (response.status !== 201) throw new Error();
 

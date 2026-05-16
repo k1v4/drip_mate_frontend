@@ -69,7 +69,7 @@ const Personal: React.FC = (): JSX.Element => {
 
     try {
       const response = await axios.patch(
-        '/api/v1/me/profile',
+        '/api/v1/users/profile',
         {
           id: userId,
           name: profileData.name,
